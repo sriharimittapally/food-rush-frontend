@@ -1,0 +1,115 @@
+// ─────────────────────────────────────────────
+// FOOTER
+// ─────────────────────────────────────────────
+.site-footer {
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-base);
+  padding: 56px 0 0;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+
+  @media (max-width: 1024px) { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 560px)  { grid-template-columns: 1fr; gap: 28px; }
+}
+
+.footer-brand {
+  p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 14px 0 18px;
+    max-width: 260px;
+  }
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--text-primary);
+
+  .fl-mark {
+    width: 34px; height: 34px;
+    background: var(--brand-gradient);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 15px;
+  }
+}
+
+.footer-socials { display: flex; gap: 8px; }
+
+.s-link {
+  width: 34px; height: 34px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-base);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-decoration: none;
+  transition: all 200ms;
+
+  &:hover {
+    background: var(--brand-primary-soft);
+    border-color: var(--border-brand);
+    color: var(--brand-primary);
+    transform: translateY(-2px);
+  }
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-col-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 4px;
+}
+
+.footer-link {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 150ms;
+  width: fit-content;
+
+  &:hover { color: var(--brand-primary); }
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0;
+  border-top: 1px solid var(--border-base);
+  flex-wrap: wrap;
+  gap: 10px;
+
+  span { font-size: 13px; color: var(--text-tertiary); }
+}
+
+.footer-built {
+  display: flex;
+  align-items: center;
+}

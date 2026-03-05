@@ -1,0 +1,216 @@
+<div class="rp-root">
+
+  <!-- ─── Sticky header with search + filters ─ -->
+  <div class="rp-header">
+    <div class="container-app">
+
+      <!-- Title row -->
+      <div class="rph-top">
+        <div>
+          <h1 class="rph-title anim-fade-up">
+            All <span class="text-brand">Restaurants</span>
+          </h1>
+          <p class="rph-count anim-fade-up d-100">
+            <ng-container *ngIf="!loading">
+              <i class="fa-solid fa-store"></i>
+              {{ filteredRestaurants.length }}
+              restaurant{{ filteredRestaurants.length !== 1 ? 's' : '' }}
+              found
+            </ng-container>
+          </p>
+        </div>
+
+        <!-- Search input -->
+        <div class="rph-search anim-fade-up d-200">
+          <i class="fa-solid fa-magnifying-glass rps-icon"></i>
+          <input
+            type="text"
+            [formControl]="searchCtrl"
+            class="rps-input"
+            placeholder="Search name, cuisine, city...">
+          <!-- clear button appears when input has value -->
+          <button
+            *ngIf="searchCtrl.value"
+            class="rps-clear"
+            (click)="searchCtrl.setValue('')">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter row -->
+      <div class="rph-filters anim-fade-up d-300">
+
+        <!-- Status filter pills -->
+        <div class="filter-group">
+          <button
+            class="filter-pill"
+            [class.active]="activeStatus === 'all'"
+            (click)="setStatus('all')">
+            <i class="fa-solid fa-border-all"></i>
+            All
+          </button>
+          <button
+            class="filter-pill"
+            [class.active]="activeStatus === 'open'"
+            (click)="setStatus('open')">
+            <span class="open-dot"></span>
+            Open Now
+          </button>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <!-- Cuisine chips — scrollable horizontally -->
+        <div class="cuisine-row">
+          <button
+            *ngFor="let c of cuisines"
+            class="cuisine-chip"
+            [class.active]="activeCuisine === c"
+            (click)="setCuisine(c)">
+            {{ c }}
+          </button>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <!-- Sort dropdown -->
+        <div class="sort-box">
+          <i class="fa-solid fa-bars-sort sort-icon"></i>
+          <select
+            [(ngModel)]="sortBy"
+            (ngModelChange)="setSort($event)"
+            class="sort-select">
+            <option value="rating">Top Rated</option>
+            <option value="name">A → Z</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Main grid area ──────────────────────── -->
+  <div class="container-app rp-content">
+
+    <!-- Result summary bar -->
+    <div *ngIf="!loading && allRestaurants.length > 0"
+         class="result-bar">
+      <span>
+        Showing
+        <strong>{{ filteredRestaurants.length }}</strong>
+        of
+        <strong>{{ allRestaurants.length }}</strong>
+        restaurants
+      </span>
+      <!-- clear filters link — shown only when filters active -->
+      <button
+        *ngIf="hasActiveFilters"
+        class="clear-btn"
+        (click)="clearAll()">
+        <i class="fa-solid fa-rotate-left"></i>
+        Clear all filters
+      </button>
+    </div>
+
+    <!-- Skeleton cards shown while loading -->
+    <div *ngIf="loading" class="rp-grid">
+      <div *ngFor="let s of skeletons" class="rc-skeleton">
+        <div class="skeleton rsk-img"></div>
+        <div class="rsk-body">
+          <div class="skeleton rsk-line w55"></div>
+          <div class="skeleton rsk-line w35"></div>
+          <div class="skeleton rsk-line w75"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actual restaurant cards -->
+    <div *ngIf="!loading && filteredRestaurants.length > 0"
+         class="rp-grid">
+      <article
+        *ngFor="let r of filteredRestaurants; let i = index"
+        class="rc anim-fade-up"
+        [style.animation-delay]="(i * 40) + 'ms'"
+        (click)="goToDetail(r.id)"
+        (keyup.enter)="goToDetail(r.id)"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="'Go to ' + r.name">
+
+        <!-- Image area -->
+        <div class="rc-img-wrap">
+          <img
+            [src]="getImage(r)"
+            [alt]="r.name"
+            class="rc-img"
+            loading="lazy">
+          <div class="rc-scrim"></div>
+
+          <!-- Open / Closed status badge -->
+          <div class="rc-status"
+               [class.is-open]="r.open"
+               [class.is-closed]="!r.open">
+            <span class="rc-dot"></span>
+            {{ r.open ? 'Open' : 'Closed' }}
+          </div>
+
+          <!-- Rating shown on image -->
+          <div class="rc-rating" *ngIf="r.rating">
+            <i class="fa-solid fa-star"></i>
+            {{ r.rating | number:'1.1-1' }}
+          </div>
+        </div>
+
+        <!-- Card body -->
+        <div class="rc-body">
+          <h3 class="rc-name">{{ r.name }}</h3>
+
+          <p class="rc-cuisine">
+            <i class="fa-solid fa-utensils"></i>
+            {{ r.cuisineType || 'Multi-cuisine' }}
+          </p>
+
+          <div class="rc-info">
+            <span class="rc-info-item">
+              <i class="fa-solid fa-location-dot"></i>
+              {{ r.city }}
+            </span>
+            <span class="rc-info-sep"></span>
+            <span class="rc-info-item">
+              <i class="fa-regular fa-clock"></i>
+              25-35 min
+            </span>
+          </div>
+
+          <div class="rc-footer">
+            <span class="rc-free-del">
+              <i class="fa-solid fa-motorcycle"></i>
+              Free delivery
+            </span>
+            <span class="rc-order">
+              Order now
+              <i class="fa-solid fa-arrow-right"></i>
+            </span>
+          </div>
+        </div>
+
+      </article>
+    </div>
+
+    <!-- Empty state when search/filter returns nothing -->
+    <div *ngIf="!loading && filteredRestaurants.length === 0"
+         class="rp-empty">
+      <div class="rpe-icon">
+        <i class="fa-solid fa-magnifying-glass-minus"></i>
+      </div>
+      <h3>No restaurants found</h3>
+      <p>Try different search terms or remove filters</p>
+      <button class="btn-brand" (click)="clearAll()">
+        <i class="fa-solid fa-rotate-left"></i>
+        Reset All Filters
+      </button>
+    </div>
+
+  </div>
+</div>

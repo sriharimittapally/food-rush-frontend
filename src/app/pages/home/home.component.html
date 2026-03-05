@@ -1,0 +1,445 @@
+<div class="home-root">
+
+  <!-- ══════════════════════════════════
+       HERO SECTION
+  ══════════════════════════════════ -->
+  <section class="hero">
+
+    <!-- animated background -->
+    <div class="hero-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-lines"></div>
+    </div>
+
+    <div class="container-app hero-inner">
+
+      <!-- LEFT: text content -->
+      <div class="hero-content">
+
+        <div class="hero-badge anim-fade-up">
+          <i class="fa-solid fa-bolt"></i>
+          Now delivering in 28 min avg.
+        </div>
+
+        <h1 class="hero-title anim-fade-up d-100">
+          Great food,<br>
+          <span class="text-brand">delivered</span><br>
+          to your door.
+        </h1>
+
+        <p class="hero-sub anim-fade-up d-200">
+          Order from hundreds of top-rated restaurants.
+          Fresh, fast and always on time.
+        </p>
+
+        <!-- Search bar -->
+        <div class="hero-search anim-fade-up d-300">
+          <div class="hs-bar">
+            <i class="fa-solid fa-magnifying-glass hs-icon"></i>
+            <input
+              type="text"
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="onSearch()"
+              class="hs-input"
+              placeholder="Search restaurants, cuisines...">
+            <button class="hs-btn" (click)="onSearch()">
+              <i class="fa-solid fa-arrow-right"></i>
+              Search
+            </button>
+          </div>
+          <!-- quick category tags below search -->
+          <div class="hs-tags">
+            <span class="hs-tag" (click)="goCategory('Pizza')">
+              <i class="fa-solid fa-pizza-slice"></i> Pizza
+            </span>
+            <span class="hs-tag" (click)="goCategory('Burgers')">
+              <i class="fa-solid fa-burger"></i> Burgers
+            </span>
+            <span class="hs-tag" (click)="goCategory('Indian')">
+              <i class="fa-solid fa-bowl-food"></i> Indian
+            </span>
+            <span class="hs-tag" (click)="goCategory('Sushi')">
+              <i class="fa-solid fa-fish"></i> Sushi
+            </span>
+          </div>
+        </div>
+
+        <!-- CTA buttons -->
+        <div class="hero-ctas anim-fade-up d-400">
+          <!-- shown only when NOT logged in -->
+          <ng-container *ngIf="!auth.isLoggedIn()">
+            <a routerLink="/register" class="btn-solid">
+              <i class="fa-solid fa-rocket"></i>
+              Get Started Free
+            </a>
+            <a routerLink="/login" class="btn-outline">
+              <i class="fa-regular fa-circle-user"></i>
+              Sign In
+            </a>
+          </ng-container>
+          <!-- shown when logged in -->
+          <ng-container *ngIf="auth.isLoggedIn()">
+            <a routerLink="/restaurants" class="btn-solid">
+              <i class="fa-solid fa-utensils"></i>
+              Browse Restaurants
+            </a>
+          </ng-container>
+        </div>
+
+        <!-- social proof strip -->
+        <div class="social-proof anim-fade-up d-500">
+          <div class="sp-avatars">
+            <div class="sp-av" style="background:#F9440A">R</div>
+            <div class="sp-av" style="background:#3B82F6">A</div>
+            <div class="sp-av" style="background:#22C55E">M</div>
+            <div class="sp-av" style="background:#F59E0B">K</div>
+          </div>
+          <div class="sp-text">
+            <div class="sp-stars">
+              <i *ngFor="let s of [1,2,3,4,5]"
+                 class="fa-solid fa-star"></i>
+            </div>
+            <span>
+              Trusted by <strong>50,000+</strong> customers
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: phone mockup (hidden on mobile) -->
+      <div class="hero-phone anim-fade-up d-200">
+        <div class="phone-shell">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+
+            <!-- mock app header -->
+            <div class="app-nav">
+              <span class="app-brand">
+                <i class="fa-solid fa-fire-flame-curved"></i>
+                FoodRush
+              </span>
+              <span class="app-city">
+                <i class="fa-solid fa-location-dot"></i>
+                Bangalore
+              </span>
+            </div>
+
+            <!-- mock search -->
+            <div class="app-search-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              Search food or restaurants...
+            </div>
+
+            <div class="app-section-label">Top Picks</div>
+
+            <!-- mock restaurant cards -->
+            <div class="app-cards">
+              <div class="app-card">
+                <div class="apc-img"
+                     style="background:linear-gradient(135deg,#F9440A,#FF7A00)">
+                  <i class="fa-solid fa-pizza-slice"></i>
+                </div>
+                <div class="apc-info">
+                  <div class="apc-name">Pizza Palace</div>
+                  <div class="apc-meta">
+                    <i class="fa-solid fa-star"></i> 4.8
+                    <span>· 25 min</span>
+                  </div>
+                </div>
+                <span class="apc-open">Open</span>
+              </div>
+
+              <div class="app-card">
+                <div class="apc-img"
+                     style="background:linear-gradient(135deg,#F59E0B,#EF4444)">
+                  <i class="fa-solid fa-burger"></i>
+                </div>
+                <div class="apc-info">
+                  <div class="apc-name">Burger Hub</div>
+                  <div class="apc-meta">
+                    <i class="fa-solid fa-star"></i> 4.6
+                    <span>· 30 min</span>
+                  </div>
+                </div>
+                <span class="apc-open">Open</span>
+              </div>
+
+              <div class="app-card">
+                <div class="apc-img"
+                     style="background:linear-gradient(135deg,#3B82F6,#8B5CF6)">
+                  <i class="fa-solid fa-fish"></i>
+                </div>
+                <div class="apc-info">
+                  <div class="apc-name">Sushi World</div>
+                  <div class="apc-meta">
+                    <i class="fa-solid fa-star"></i> 4.9
+                    <span>· 35 min</span>
+                  </div>
+                </div>
+                <span class="apc-open">Open</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- floating notification chips -->
+        <div class="chip chip-1">
+          <i class="fa-solid fa-circle-check"></i>
+          <div>
+            <div class="chip-title">Order Confirmed!</div>
+            <div class="chip-sub">Pizza Palace · ₹549</div>
+          </div>
+        </div>
+
+        <div class="chip chip-2">
+          <div class="chip-moto">
+            <i class="fa-solid fa-motorcycle"></i>
+          </div>
+          <div>
+            <div class="chip-title">On the way</div>
+            <div class="chip-sub">ETA 12 minutes</div>
+          </div>
+        </div>
+
+        <div class="chip chip-3">
+          <i class="fa-solid fa-star"></i>
+          <div>
+            <div class="chip-title">4.9 Rating</div>
+            <div class="chip-sub">Top Rated</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       STATS STRIP
+  ══════════════════════════════════ -->
+  <section class="stats-strip">
+    <div class="container-app stats-grid">
+      <div *ngFor="let s of stats" class="stat-card">
+        <div class="stat-icon-box">
+          <i class="fa-solid" [class]="s.icon"></i>
+        </div>
+        <div class="stat-value">{{ s.value }}</div>
+        <div class="stat-label">{{ s.label }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       CATEGORIES
+  ══════════════════════════════════ -->
+  <section class="section">
+    <div class="container-app">
+
+      <div class="sec-head">
+        <div class="eyebrow">
+          <i class="fa-solid fa-fire-flame-curved"></i>
+          What are you craving?
+        </div>
+        <h2>Browse by <span class="text-brand">Category</span></h2>
+      </div>
+
+      <div class="cat-grid">
+        <div
+          *ngFor="let c of categories; let i = index"
+          class="cat-card anim-fade-up"
+          [style.animation-delay]="(i * 55) + 'ms'"
+          (click)="goCategory(c.name)">
+          <div class="cat-icon-box"
+               [style.background]="c.bg"
+               [style.color]="c.color">
+            <i class="fa-solid" [class]="c.icon"></i>
+          </div>
+          <span class="cat-name">{{ c.name }}</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       FEATURED RESTAURANTS
+  ══════════════════════════════════ -->
+  <section class="section bg-elevated-section">
+    <div class="container-app">
+
+      <div class="sec-head sec-head-row">
+        <div>
+          <div class="eyebrow">
+            <i class="fa-solid fa-award"></i>
+            Top Picks
+          </div>
+          <h2>Featured <span class="text-brand">Restaurants</span></h2>
+          <p>Hand-picked with the best ratings and fastest delivery.</p>
+        </div>
+        <a routerLink="/restaurants" class="view-all-btn">
+          View all
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- skeleton shown while loading -->
+      <div *ngIf="loading" class="restaurants-grid">
+        <div *ngFor="let s of skeletons" class="r-skeleton">
+          <div class="skeleton sk-img"></div>
+          <div class="sk-body">
+            <div class="skeleton sk-line w60"></div>
+            <div class="skeleton sk-line w40"></div>
+            <div class="skeleton sk-line w75 mt8"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- actual restaurant cards from backend -->
+      <div *ngIf="!loading && restaurants.length > 0"
+           class="restaurants-grid">
+        <div
+          *ngFor="let r of restaurants; let i = index"
+          class="r-card anim-fade-up"
+          [style.animation-delay]="(i * 70) + 'ms'"
+          [routerLink]="['/restaurants', r.id]">
+
+          <div class="r-img-wrap">
+            <img [src]="getImage(r)"
+                 [alt]="r.name"
+                 class="r-img"
+                 loading="lazy">
+            <div class="r-scrim"></div>
+
+            <!-- open / closed badge on image -->
+            <span class="r-badge"
+                  [class.badge-open]="r.open"
+                  [class.badge-closed]="!r.open">
+              <span class="badge-dot"></span>
+              {{ r.open ? 'Open' : 'Closed' }}
+            </span>
+
+            <!-- rating pill bottom right of image -->
+            <div class="r-rating" *ngIf="r.rating">
+              <i class="fa-solid fa-star"></i>
+              {{ r.rating | number:'1.1-1' }}
+            </div>
+          </div>
+
+          <div class="r-body">
+            <h3 class="r-name">{{ r.name }}</h3>
+            <p class="r-cuisine">
+              <i class="fa-solid fa-utensils"></i>
+              {{ r.cuisineType || 'Multi-cuisine' }}
+            </p>
+            <div class="r-meta">
+              <span>
+                <i class="fa-solid fa-location-dot"></i>
+                {{ r.city }}
+              </span>
+              <span class="meta-dot"></span>
+              <span>
+                <i class="fa-regular fa-clock"></i>
+                25-35 min
+              </span>
+            </div>
+            <div class="r-footer">
+              <span class="r-delivery">
+                <i class="fa-solid fa-motorcycle"></i>
+                Free delivery
+              </span>
+              <span class="r-cta">
+                Order now
+                <i class="fa-solid fa-arrow-right"></i>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- empty state when no restaurants in DB yet -->
+      <div *ngIf="!loading && restaurants.length === 0"
+           class="empty-state">
+        <i class="fa-solid fa-store-slash"></i>
+        <h3>No restaurants yet</h3>
+        <p>Add your first restaurant to get started.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       HOW IT WORKS
+  ══════════════════════════════════ -->
+  <section class="section">
+    <div class="container-app">
+
+      <div class="sec-head centered">
+        <div class="eyebrow">
+          <i class="fa-solid fa-circle-question"></i>
+          Simple Process
+        </div>
+        <h2>How <span class="text-brand">FoodRush</span> Works</h2>
+        <p>Get your favourite food in 4 easy steps.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div
+          *ngFor="let s of steps; let i = index"
+          class="step-card anim-fade-up"
+          [style.animation-delay]="(i * 100) + 'ms'">
+
+          <div class="step-num">{{ s.num }}</div>
+          <div class="step-icon-box">
+            <i class="fa-solid" [class]="s.icon"></i>
+          </div>
+          <h3 class="step-title">{{ s.title }}</h3>
+          <p class="step-desc">{{ s.desc }}</p>
+
+          <!-- connector arrow between steps -->
+          <div class="step-arrow" *ngIf="i < steps.length - 1">
+            <i class="fa-solid fa-chevron-right"></i>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       CTA BANNER (guests only)
+  ══════════════════════════════════ -->
+  <section class="cta-section" *ngIf="!auth.isLoggedIn()">
+    <div class="container-app">
+      <div class="cta-box">
+        <div class="cta-orb cta-orb-1"></div>
+        <div class="cta-orb cta-orb-2"></div>
+
+        <div class="cta-inner">
+          <div class="cta-badge">
+            <i class="fa-solid fa-gift"></i>
+            Free delivery on your first order
+          </div>
+          <h2>Ready to order?</h2>
+          <p>Join 50,000+ customers. Sign up in 30 seconds.</p>
+          <div class="cta-btns">
+            <a routerLink="/register" class="btn-solid">
+              <i class="fa-solid fa-rocket"></i>
+              Create Free Account
+            </a>
+            <a routerLink="/restaurants" class="btn-outline light">
+              <i class="fa-solid fa-utensils"></i>
+              Browse Restaurants
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+
+</div>

@@ -1,0 +1,228 @@
+<p>login works!</p>
+a<div class="auth-root">
+
+  <!-- ── Left: Brand Panel ──────────────────── -->
+  <div class="auth-panel-left">
+    <div class="apl-inner">
+
+      <!-- Brand -->
+      <div class="apl-brand anim-fade-up">
+        <div class="logo-mark">
+          <i class="fa-solid fa-fire-flame-curved"></i>
+        </div>
+        <div class="logo-wordmark">
+          <span class="logo-primary">Food</span><span
+            class="logo-accent">Rush</span>
+        </div>
+      </div>
+
+      <!-- Headline -->
+      <div class="apl-headline anim-fade-up d-100">
+        <h1>
+          Great food,<br>
+          <span class="text-brand">delivered fast.</span>
+        </h1>
+        <p>
+          Access hundreds of restaurants, track your
+          order in real-time and enjoy every bite.
+        </p>
+      </div>
+
+      <!-- Metric strip -->
+      <div class="apl-metrics anim-fade-up d-200">
+        <div class="metric-item">
+          <div class="metric-val">500+</div>
+          <div class="metric-key">Restaurants</div>
+        </div>
+        <div class="metric-sep"></div>
+        <div class="metric-item">
+          <div class="metric-val">50K+</div>
+          <div class="metric-key">Happy Customers</div>
+        </div>
+        <div class="metric-sep"></div>
+        <div class="metric-item">
+          <div class="metric-val">28 min</div>
+          <div class="metric-key">Avg. Delivery</div>
+        </div>
+      </div>
+
+      <!-- Feature list -->
+      <ul class="apl-features anim-fade-up d-300">
+        <li>
+          <div class="feat-icon">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div>
+            <div class="feat-title">Lightning-fast delivery</div>
+            <div class="feat-sub">Real-time GPS tracking</div>
+          </div>
+        </li>
+        <li>
+          <div class="feat-icon">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <div class="feat-title">Secure &amp; Private</div>
+            <div class="feat-sub">JWT authenticated sessions</div>
+          </div>
+        </li>
+        <li>
+          <div class="feat-icon">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <div>
+            <div class="feat-title">Curated restaurants</div>
+            <div class="feat-sub">Quality-checked partners</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Decorative blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- ── Right: Form Panel ──────────────────── -->
+  <div class="auth-panel-right">
+    <div class="auth-form-card anim-scale-in">
+
+      <!-- Header -->
+      <div class="afc-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to your FoodRush account</p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="form"
+            (ngSubmit)="onSubmit()"
+            novalidate>
+
+        <!-- Email -->
+        <div class="field-group mb-4 anim-fade-up d-100">
+          <label class="field-label" for="email">
+            Email address
+          </label>
+          <div class="field-wrap">
+            <i class="fa-regular fa-envelope field-icon-left"></i>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="field-input has-left"
+              [class.field-error]="email.invalid && email.touched"
+              placeholder="you@example.com"
+              autocomplete="email">
+          </div>
+          <div class="field-error-msg"
+               *ngIf="email.invalid && email.touched">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ email.errors?.['required']
+               ? 'Email address is required'
+               : 'Please enter a valid email' }}
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group mb-4 anim-fade-up d-200">
+          <div class="field-label-row">
+            <label class="field-label" for="password">
+              Password
+            </label>
+            <a href="#" class="forgot-link">
+              Forgot password?
+            </a>
+          </div>
+          <div class="field-wrap">
+            <i class="fa-solid fa-lock field-icon-left"></i>
+            <input
+              id="password"
+              [type]="showPass ? 'text' : 'password'"
+              formControlName="password"
+              class="field-input has-left has-right"
+              [class.field-error]="password.invalid && password.touched"
+              placeholder="Minimum 6 characters"
+              autocomplete="current-password">
+            <button type="button"
+                    class="field-icon-right eye-toggle"
+                    (click)="showPass = !showPass">
+              <i class="fa-regular"
+                 [class.fa-eye]="!showPass"
+                 [class.fa-eye-slash]="showPass"></i>
+            </button>
+          </div>
+          <div class="field-error-msg"
+               *ngIf="password.invalid && password.touched">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ password.errors?.['required']
+               ? 'Password is required'
+               : 'Minimum 6 characters required' }}
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="btn-brand btn-lg btn-full anim-fade-up d-300"
+          [disabled]="loading">
+          <span *ngIf="!loading">
+            Sign In
+            <i class="fa-solid fa-arrow-right-long"></i>
+          </span>
+          <span *ngIf="loading"
+                class="d-flex align-items-center
+                       justify-content-center gap-2">
+            <span class="spinner"></span>
+            Authenticating...
+          </span>
+        </button>
+
+        <!-- Quick Demo -->
+        <div class="demo-panel anim-fade-up d-400">
+          <div class="demo-label">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            Quick demo access
+          </div>
+          <div class="demo-grid">
+            <button type="button" class="demo-tile"
+              (click)="form.patchValue({
+                email:'john@example.com',
+                password:'john123'})">
+              <i class="fa-solid fa-user"></i>
+              <span class="dt-role">Customer</span>
+              <span class="dt-hint">Browse &amp; order</span>
+            </button>
+            <button type="button" class="demo-tile"
+              (click)="form.patchValue({
+                email:'owner@pizza.com',
+                password:'owner123'})">
+              <i class="fa-solid fa-store"></i>
+              <span class="dt-role">Owner</span>
+              <span class="dt-hint">Manage restaurant</span>
+            </button>
+            <button type="button" class="demo-tile"
+              (click)="form.patchValue({
+                email:'admin@foodapp.com',
+                password:'admin123'})">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span class="dt-role">Admin</span>
+              <span class="dt-hint">Full control</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Footer -->
+      <p class="auth-footer-link anim-fade-up d-500">
+        Don't have an account?
+        <a routerLink="/register">
+          Create one free
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </p>
+
+    </div>
+  </div>
+</div>

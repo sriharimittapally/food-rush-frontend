@@ -1,0 +1,46 @@
+<div class="iu-zone"
+     [class.has-image]="preview || currentUrl"
+     [style.height]="height"
+     (click)="open()">
+
+  <!-- Hidden file input -->
+  <input #fi
+         type="file"
+         accept="image/*"
+         style="display:none"
+         (change)="onFile($event)">
+
+  <!-- Image preview -->
+  <img *ngIf="preview || currentUrl"
+       [src]="preview || currentUrl"
+       class="iu-preview"
+       alt="Image preview">
+
+  <!-- Overlay shown on hover or when empty -->
+  <div class="iu-overlay">
+
+    <ng-container *ngIf="uploading">
+      <div class="iu-spinner"></div>
+      <span class="iu-label">Uploading...</span>
+    </ng-container>
+
+    <ng-container *ngIf="!uploading">
+      <i class="fa-solid fa-cloud-arrow-up iu-icon"></i>
+      <span class="iu-label">
+        {{ (preview || currentUrl)
+           ? 'Change Image'
+           : 'Click to Upload' }}
+      </span>
+      <span class="iu-hint">
+        JPG · PNG · WebP · Max 5MB
+      </span>
+    </ng-container>
+
+  </div>
+</div>
+
+<!-- Error -->
+<div class="iu-error" *ngIf="error">
+  <i class="fa-solid fa-circle-exclamation"></i>
+  {{ error }}
+</div>

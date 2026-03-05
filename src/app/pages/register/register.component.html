@@ -1,0 +1,232 @@
+<div class="auth-root">
+
+  <!-- ── Left Panel ───────────────────────── -->
+  <div class="auth-panel-left">
+    <div class="apl-inner">
+
+      <div class="apl-brand anim-fade-up">
+        <div class="logo-mark">
+          <i class="fa-solid fa-fire-flame-curved"></i>
+        </div>
+        <div class="logo-wordmark">
+          <span class="logo-primary">Food</span><span
+            class="logo-accent">Rush</span>
+        </div>
+      </div>
+
+      <div class="apl-headline anim-fade-up d-100">
+        <h1>
+          Start your<br>
+          <span class="text-brand">food journey</span><br>
+          today.
+        </h1>
+        <p>
+          Join thousands ordering from the best
+          restaurants, delivered straight to your door.
+        </p>
+      </div>
+
+      <ul class="apl-features anim-fade-up d-200">
+        <li>
+          <div class="feat-icon">
+            <i class="fa-solid fa-rocket"></i>
+          </div>
+          <div>
+            <div class="feat-title">Ready in 60 seconds</div>
+            <div class="feat-sub">Quick sign-up, instant access</div>
+          </div>
+        </li>
+        <li>
+          <div class="feat-icon">
+            <i class="fa-solid fa-location-dot"></i>
+          </div>
+          <div>
+            <div class="feat-title">Live order tracking</div>
+            <div class="feat-sub">Know exactly where your food is</div>
+          </div>
+        </li>
+        <li>
+          <div class="feat-icon">
+            <i class="fa-solid fa-percent"></i>
+          </div>
+          <div>
+            <div class="feat-title">Exclusive offers</div>
+            <div class="feat-sub">Member-only deals daily</div>
+          </div>
+        </li>
+        <li>
+          <div class="feat-icon">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+          <div>
+            <div class="feat-title">24/7 support</div>
+            <div class="feat-sub">We're always here to help</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <!-- ── Right Panel ──────────────────────── -->
+  <div class="auth-panel-right">
+    <div class="auth-form-card anim-scale-in">
+
+      <div class="afc-header">
+        <h2>Create account</h2>
+        <p>Fill in your details to get started</p>
+      </div>
+
+      <form [formGroup]="form"
+            (ngSubmit)="onSubmit()"
+            novalidate>
+
+        <!-- Role selector -->
+        <div class="role-selector anim-fade-up d-100">
+          <div class="field-label mb-2">I am a</div>
+          <div class="role-grid">
+            <div *ngFor="let r of roles"
+                 class="role-card"
+                 [class.selected]="selectedRole === r.value"
+                 (click)="selectRole(r.value)">
+              <div class="rc-icon-wrap">
+                <i class="fa-solid"
+                   [class.fa-user]="r.value === 'CUSTOMER'"
+                   [class.fa-store]="r.value === 'RESTAURANT_OWNER'">
+                </i>
+              </div>
+              <div class="rc-body">
+                <div class="rc-title">{{ r.label }}</div>
+                <div class="rc-desc">{{ r.desc }}</div>
+              </div>
+              <div class="rc-check"
+                   *ngIf="selectedRole === r.value">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full Name -->
+        <div class="field-group mb-3 anim-fade-up d-200">
+          <label class="field-label">Full Name</label>
+          <div class="field-wrap">
+            <i class="fa-regular fa-id-card field-icon-left"></i>
+            <input type="text"
+                   formControlName="fullName"
+                   class="field-input has-left"
+                   [class.field-error]="fullName.invalid && fullName.touched"
+                   placeholder="John Doe"
+                   autocomplete="name">
+          </div>
+          <div class="field-error-msg"
+               *ngIf="fullName.invalid && fullName.touched">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ fullName.errors?.['required']
+               ? 'Full name is required'
+               : 'Minimum 3 characters' }}
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="field-group mb-3 anim-fade-up d-200">
+          <label class="field-label">Email Address</label>
+          <div class="field-wrap">
+            <i class="fa-regular fa-envelope field-icon-left"></i>
+            <input type="email"
+                   formControlName="email"
+                   class="field-input has-left"
+                   [class.field-error]="email.invalid && email.touched"
+                   placeholder="you@example.com"
+                   autocomplete="email">
+          </div>
+          <div class="field-error-msg"
+               *ngIf="email.invalid && email.touched">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ email.errors?.['required']
+               ? 'Email is required'
+               : 'Enter a valid email address' }}
+          </div>
+        </div>
+
+        <!-- Phone + Password row -->
+        <div class="two-col anim-fade-up d-300">
+          <div class="field-group">
+            <label class="field-label">Phone Number</label>
+            <div class="field-wrap">
+              <i class="fa-solid fa-mobile-screen field-icon-left"></i>
+              <input type="tel"
+                     formControlName="phone"
+                     class="field-input has-left"
+                     [class.field-error]="phone.invalid && phone.touched"
+                     placeholder="10-digit number"
+                     autocomplete="tel">
+            </div>
+            <div class="field-error-msg"
+                 *ngIf="phone.invalid && phone.touched">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              {{ phone.errors?.['required']
+                 ? 'Phone required'
+                 : 'Enter 10-digit number' }}
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Password</label>
+            <div class="field-wrap">
+              <i class="fa-solid fa-lock field-icon-left"></i>
+              <input [type]="showPass ? 'text' : 'password'"
+                     formControlName="password"
+                     class="field-input has-left has-right"
+                     [class.field-error]="password.invalid && password.touched"
+                     placeholder="Min. 6 characters"
+                     autocomplete="new-password">
+              <button type="button"
+                      class="field-icon-right eye-toggle"
+                      (click)="showPass = !showPass">
+                <i class="fa-regular"
+                   [class.fa-eye]="!showPass"
+                   [class.fa-eye-slash]="showPass"></i>
+              </button>
+            </div>
+            <div class="field-error-msg"
+                 *ngIf="password.invalid && password.touched">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              {{ password.errors?.['required']
+                 ? 'Password required'
+                 : 'Min. 6 characters' }}
+            </div>
+          </div>
+        </div>
+
+       
+        <!-- Submit -->
+<button
+  type="submit"
+  class="submit-btn anim-fade-up d-400"
+  [disabled]="loading">
+  <span *ngIf="!loading">
+    Create Account
+    <i class="fa-solid fa-arrow-right-long"></i>
+  </span>
+  <span *ngIf="loading"
+        style="display:flex;align-items:center;
+               justify-content:center;gap:8px;">
+    <span class="spinner"></span>
+    Creating account...
+  </span>
+</button>
+
+      </form>
+
+      <p class="auth-footer-link anim-fade-up d-500">
+        Already have an account?
+        <a routerLink="/login">
+          Sign in
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
