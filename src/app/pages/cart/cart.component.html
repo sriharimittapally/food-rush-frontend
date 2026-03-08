@@ -1,1 +1,289 @@
-<p>cart works!</p>
+<div class="cart-root">
+  <div class="container-app cart-layout">
+
+    <!-- ══════════════════════════════════
+         LEFT — Cart Items
+    ══════════════════════════════════ -->
+    <div class="cart-left">
+
+      <!-- Header -->
+      <div class="cart-header">
+        <div class="ch-left">
+          <button class="back-btn" (click)="goToRestaurant()">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div>
+            <h1 class="cart-title">Your Cart</h1>
+            <p class="cart-sub">
+              {{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }}
+              in your cart
+            </p>
+          </div>
+        </div>
+
+        <!-- clear cart -->
+        <button class="clear-btn" (click)="clearCart()">
+          <i class="fa-solid fa-trash"></i>
+          Clear Cart
+        </button>
+      </div>
+
+      <!-- Restaurant info strip -->
+      <div class="restaurant-strip" *ngIf="items.length > 0">
+        <div class="rs-icon">
+          <i class="fa-solid fa-store"></i>
+        </div>
+        <div class="rs-info">
+          <span class="rs-label">Ordering from</span>
+          <span class="rs-name">
+            {{ items[0].menuItem.restaurantName }}
+          </span>
+        </div>
+        <a class="rs-link"
+           (click)="goToRestaurant()">
+          Add more items
+          <i class="fa-solid fa-plus"></i>
+        </a>
+      </div>
+
+      <!-- Cart items list -->
+      <div class="cart-items">
+        <div
+          *ngFor="let item of items; let i = index"
+          class="cart-item anim-fade-up"
+          [style.animation-delay]="(i * 50) + 'ms'">
+
+          <!-- Food image -->
+          <div class="ci-img-wrap">
+            <img
+              [src]="getImage(item)"
+              [alt]="item.menuItem.name"
+              class="ci-img">
+
+            <!-- veg/nonveg dot -->
+            <div class="ci-veg-dot"
+                 [class.veg]="item.menuItem.veg"
+                 [class.nonveg]="!item.menuItem.veg">
+              <div class="vd-inner"></div>
+            </div>
+          </div>
+
+          <!-- Item info -->
+          <div class="ci-info">
+            <h3 class="ci-name">{{ item.menuItem.name }}</h3>
+            <p class="ci-category">
+              {{ item.menuItem.category }}
+            </p>
+            <div class="ci-unit-price">
+              <i class="fa-solid fa-indian-rupee-sign"></i>
+              {{ item.menuItem.price | number:'1.0-0' }}
+              per item
+            </div>
+          </div>
+
+          <!-- Quantity + price -->
+          <div class="ci-right">
+
+            <!-- quantity controls -->
+            <div class="ci-qty">
+              <button class="cq-btn" (click)="decrease(item)">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <span class="cq-num">{{ item.quantity }}</span>
+              <button class="cq-btn" (click)="increase(item)">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+
+            <!-- item total price -->
+            <div class="ci-total">
+              <i class="fa-solid fa-indian-rupee-sign"></i>
+              {{ item.menuItem.price * item.quantity | number:'1.0-0' }}
+            </div>
+
+            <!-- remove button -->
+            <button class="ci-remove" (click)="remove(item)"
+                    title="Remove item">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery address -->
+      <div class="section-card">
+        <div class="sc-header">
+          <i class="fa-solid fa-location-dot sc-icon"></i>
+          <h2 class="sc-title">Delivery Address</h2>
+        </div>
+
+        <textarea
+          [formControl]="addressCtrl"
+          class="address-input"
+          rows="3"
+          placeholder="Enter your full delivery address including flat no, street, area, city...">
+        </textarea>
+
+        <!-- validation error -->
+        <div class="field-error"
+             *ngIf="addressCtrl.touched && addressCtrl.invalid">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          Please enter a valid delivery address
+          (minimum 10 characters)
+        </div>
+      </div>
+
+      <!-- Special instructions -->
+      <div class="section-card">
+        <div class="sc-header">
+          <i class="fa-solid fa-note-sticky sc-icon"></i>
+          <h2 class="sc-title">Special Instructions</h2>
+          <span class="sc-optional">(optional)</span>
+        </div>
+
+        <textarea
+          [formControl]="instructionsCtrl"
+          class="address-input"
+          rows="2"
+          placeholder="e.g. No onions, extra spicy, ring the doorbell...">
+        </textarea>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════
+         RIGHT — Order Summary
+    ══════════════════════════════════ -->
+    <div class="cart-right">
+      <div class="summary-card">
+
+        <h2 class="summary-title">Order Summary</h2>
+
+        <!-- Price breakdown -->
+        <div class="summary-rows">
+
+          <div class="summary-row"
+               *ngFor="let item of items">
+            <span class="sr-name">
+              {{ item.menuItem.name }}
+              <span class="sr-qty">× {{ item.quantity }}</span>
+            </span>
+            <span class="sr-price">
+              <i class="fa-solid fa-indian-rupee-sign"></i>
+              {{ item.menuItem.price * item.quantity | number:'1.0-0' }}
+            </span>
+          </div>
+
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <!-- Subtotal -->
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+            {{ subtotal | number:'1.0-0' }}
+          </span>
+        </div>
+
+        <!-- Delivery fee -->
+        <div class="summary-row">
+          <span>Delivery Fee</span>
+          <span class="free-text">
+            <i class="fa-solid fa-motorcycle"></i>
+            Free
+          </span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <!-- Total -->
+        <div class="summary-row total-row">
+          <span>Total</span>
+          <span class="total-amount">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+            {{ total | number:'1.0-0' }}
+          </span>
+        </div>
+
+        <!-- savings note -->
+        <div class="savings-note">
+          <i class="fa-solid fa-tag"></i>
+          You save ₹40 on delivery!
+        </div>
+
+        <!-- Place order button -->
+        <button
+          class="place-order-btn"
+          [disabled]="placing || items.length === 0"
+          (click)="placeOrder()">
+
+          <ng-container *ngIf="!placing">
+            <i class="fa-solid fa-bag-shopping"></i>
+            Place Order ·
+            <i class="fa-solid fa-indian-rupee-sign"
+               style="font-size:12px"></i>
+            {{ total | number:'1.0-0' }}
+          </ng-container>
+
+          <ng-container *ngIf="placing">
+            <div class="btn-spinner"></div>
+            Placing your order...
+          </ng-container>
+
+        </button>
+
+        <!-- safety note -->
+        <div class="safety-note">
+          <i class="fa-solid fa-shield-halved"></i>
+          Secure checkout · No hidden charges
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ORDER SUCCESS MODAL
+══════════════════════════════════════════ -->
+<div class="success-overlay" *ngIf="showSuccessModal"></div>
+
+<div class="success-modal" *ngIf="showSuccessModal">
+
+  <!-- animated checkmark -->
+  <div class="sm-check-wrap">
+    <div class="sm-check">
+      <i class="fa-solid fa-check"></i>
+    </div>
+    <div class="sm-ripple"></div>
+  </div>
+
+  <h2 class="sm-title">Order Placed!</h2>
+  <p class="sm-sub">
+    Your order <strong>#{{ placedOrderId }}</strong> has been
+    placed successfully. The restaurant will confirm it shortly.
+  </p>
+
+  <!-- order id badge -->
+  <div class="sm-order-id">
+    <i class="fa-solid fa-receipt"></i>
+    Order #{{ placedOrderId }}
+  </div>
+
+  <!-- actions -->
+  <div class="sm-actions">
+    <button class="sm-secondary" (click)="goToOrders()">
+      <i class="fa-solid fa-list"></i>
+      My Orders
+    </button>
+    <button class="sm-primary" (click)="goToTracking()">
+      <i class="fa-solid fa-location-dot"></i>
+      Track Order
+    </button>
+  </div>
+
+</div>

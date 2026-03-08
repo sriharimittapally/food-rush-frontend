@@ -1,1 +1,284 @@
-<p>profile works!</p>
+<div class="profile-root">
+  <div class="container-app">
+
+    <!-- Loading skeleton -->
+    <div *ngIf="loading" class="profile-skeleton">
+      <div class="ps-left">
+        <div class="skeleton ps-avatar"></div>
+        <div class="skeleton ps-name"></div>
+        <div class="skeleton ps-role"></div>
+      </div>
+      <div class="ps-right">
+        <div class="skeleton ps-line"></div>
+        <div class="skeleton ps-line w60"></div>
+        <div class="skeleton ps-line w40"></div>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!loading && profile">
+
+      <!-- ── Profile hero ── -->
+      <div class="profile-hero anim-fade-up">
+
+        <!-- Avatar -->
+        <div class="ph-avatar-wrap">
+          <div class="ph-avatar" *ngIf="!getAvatar()">
+            {{ getInitial() }}
+          </div>
+          <img *ngIf="getAvatar()"
+               [src]="getAvatar()!"
+               class="ph-avatar-img"
+               [alt]="profile.fullName">
+
+          <!-- role badge -->
+          <div class="ph-role-badge"
+               [style.color]="getRoleConfig().color"
+               [style.background]="getRoleConfig().bg">
+            <i class="fa-solid" [class]="getRoleConfig().icon"></i>
+            {{ getRoleConfig().label }}
+          </div>
+        </div>
+
+        <!-- Hero info -->
+        <div class="ph-info">
+          <h1 class="ph-name">{{ profile.fullName }}</h1>
+          <div class="ph-email">
+            <i class="fa-solid fa-envelope"></i>
+            {{ profile.email }}
+          </div>
+          <div class="ph-meta">
+            <div class="ph-meta-item">
+              <i class="fa-solid fa-phone"></i>
+              {{ profile.phone || 'No phone added' }}
+            </div>
+            <div class="ph-meta-item">
+              <i class="fa-regular fa-calendar"></i>
+              Member since
+              {{ profile.createdAt | date:'MMM yyyy' }}
+            </div>
+            <div class="ph-meta-item">
+              <i class="fa-solid fa-circle"
+                 [style.color]="profile.active ? '#22C55E' : '#EF4444'"
+                 style="font-size:8px"></i>
+              {{ profile.active ? 'Active Account' : 'Inactive' }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Tabs ── -->
+      <div class="profile-tabs anim-fade-up d-100">
+        <button class="pt-tab"
+                [class.active]="activeTab === 'info'"
+                (click)="activeTab = 'info'">
+          <i class="fa-solid fa-user-pen"></i>
+          Edit Profile
+        </button>
+        <button class="pt-tab"
+                [class.active]="activeTab === 'password'"
+                (click)="activeTab = 'password'">
+          <i class="fa-solid fa-lock"></i>
+          Change Password
+        </button>
+      </div>
+
+      <!-- ── Edit Profile Tab ── -->
+      <div *ngIf="activeTab === 'info'"
+           class="profile-card anim-fade-up">
+
+        <div class="pc-header">
+          <h2 class="pc-title">Profile Information</h2>
+          <p class="pc-sub">
+            Update your personal details and photo
+          </p>
+        </div>
+
+        <form [formGroup]="profileForm"
+              class="pc-form"
+              (ngSubmit)="saveProfile()">
+
+          <!-- Profile photo -->
+          <div class="form-group full">
+            <label class="form-label">Profile Photo</label>
+            <app-image-upload
+              folder="foodrush/profiles"
+              [currentUrl]="profileForm.get('imageUrl')?.value"
+              height="160px"
+              label="Upload Profile Photo"
+              (uploaded)="onImageUploaded($event)">
+            </app-image-upload>
+          </div>
+
+          <!-- Full name -->
+          <div class="form-group">
+            <label class="form-label">
+              Full Name <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="fullName"
+              class="form-input"
+              [class.error]="isFieldInvalid(profileForm,'fullName')"
+              placeholder="Your full name">
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(profileForm,'fullName')">
+              Full name is required
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-group">
+            <label class="form-label">
+              Phone <span class="req">*</span>
+            </label>
+            <input
+              type="tel"
+              formControlName="phone"
+              class="form-input"
+              [class.error]="isFieldInvalid(profileForm,'phone')"
+              placeholder="10-digit mobile number">
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(profileForm,'phone')">
+              Enter a valid 10-digit phone number
+            </div>
+          </div>
+
+          <!-- Email — read only -->
+          <div class="form-group full">
+            <label class="form-label">Email Address</label>
+            <div class="readonly-field">
+              <i class="fa-solid fa-envelope"></i>
+              {{ profile.email }}
+              <span class="readonly-badge">Cannot be changed</span>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="form-actions full">
+            <button type="submit"
+                    class="btn-brand"
+                    [disabled]="saving">
+              <div class="btn-spinner" *ngIf="saving"></div>
+              <i class="fa-solid fa-floppy-disk"
+                 *ngIf="!saving"></i>
+              {{ saving ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- ── Change Password Tab ── -->
+      <div *ngIf="activeTab === 'password'"
+           class="profile-card anim-fade-up">
+
+        <div class="pc-header">
+          <h2 class="pc-title">Change Password</h2>
+          <p class="pc-sub">
+            Choose a strong password with at least 6 characters
+          </p>
+        </div>
+
+        <form [formGroup]="passwordForm"
+              class="pc-form single-col"
+              (ngSubmit)="changePassword()">
+
+          <!-- Current password -->
+          <div class="form-group full">
+            <label class="form-label">
+              Current Password <span class="req">*</span>
+            </label>
+            <div class="pwd-wrap">
+              <input
+                [type]="showCurrentPwd ? 'text' : 'password'"
+                formControlName="currentPassword"
+                class="form-input"
+                [class.error]="isFieldInvalid(passwordForm,'currentPassword')"
+                placeholder="Enter current password">
+              <button type="button"
+                      class="pwd-toggle"
+                      (click)="showCurrentPwd = !showCurrentPwd">
+                <i class="fa-solid"
+                   [class.fa-eye]="!showCurrentPwd"
+                   [class.fa-eye-slash]="showCurrentPwd"></i>
+              </button>
+            </div>
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(passwordForm,'currentPassword')">
+              Current password is required
+            </div>
+          </div>
+
+          <!-- New password -->
+          <div class="form-group full">
+            <label class="form-label">
+              New Password <span class="req">*</span>
+            </label>
+            <div class="pwd-wrap">
+              <input
+                [type]="showNewPwd ? 'text' : 'password'"
+                formControlName="newPassword"
+                class="form-input"
+                [class.error]="isFieldInvalid(passwordForm,'newPassword')"
+                placeholder="Minimum 6 characters">
+              <button type="button"
+                      class="pwd-toggle"
+                      (click)="showNewPwd = !showNewPwd">
+                <i class="fa-solid"
+                   [class.fa-eye]="!showNewPwd"
+                   [class.fa-eye-slash]="showNewPwd"></i>
+              </button>
+            </div>
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(passwordForm,'newPassword')">
+              Password must be at least 6 characters
+            </div>
+          </div>
+
+          <!-- Confirm password -->
+          <div class="form-group full">
+            <label class="form-label">
+              Confirm New Password <span class="req">*</span>
+            </label>
+            <div class="pwd-wrap">
+              <input
+                [type]="showConfirmPwd ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                class="form-input"
+                [class.error]="passwordForm.errors?.['mismatch']
+                               && passwordForm.get('confirmPassword')?.touched"
+                placeholder="Repeat new password">
+              <button type="button"
+                      class="pwd-toggle"
+                      (click)="showConfirmPwd = !showConfirmPwd">
+                <i class="fa-solid"
+                   [class.fa-eye]="!showConfirmPwd"
+                   [class.fa-eye-slash]="showConfirmPwd"></i>
+              </button>
+            </div>
+            <div class="form-error"
+                 *ngIf="passwordForm.errors?.['mismatch']
+                        && passwordForm.get('confirmPassword')?.touched">
+              Passwords do not match
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="form-actions full">
+            <button type="submit"
+                    class="btn-brand"
+                    [disabled]="changingPwd">
+              <div class="btn-spinner" *ngIf="changingPwd"></div>
+              <i class="fa-solid fa-lock"
+                 *ngIf="!changingPwd"></i>
+              {{ changingPwd ? 'Changing...' : 'Change Password' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

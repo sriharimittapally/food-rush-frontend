@@ -1,1 +1,811 @@
-<p>owner-dashboard works!</p>
+<div class="od-root">
+  <div class="container-app">
+
+    <!-- ══════════════════════
+         PAGE HEADER
+    ══════════════════════ -->
+    <div class="od-header anim-fade-up">
+      <div>
+        <h1 class="od-title">Owner Dashboard</h1>
+        <p class="od-sub">
+          Manage your restaurant, menu and orders
+        </p>
+      </div>
+
+      <!-- restaurant status toggle — only shown when
+           restaurant exists and on restaurant tab -->
+      <div class="od-status-toggle"
+           *ngIf="hasRestaurant && restaurant">
+        <span class="ost-label">Restaurant Status</span>
+        <div class="ost-switch"
+             [class.is-open]="restaurant.open"
+             (click)="toggleRestaurantStatus()">
+          <div class="ost-track">
+            <div class="ost-thumb"></div>
+          </div>
+          <span class="ost-text">
+            {{ restaurant.open ? 'Open' : 'Closed' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════
+         TABS
+    ══════════════════════ -->
+    <div class="od-tabs anim-fade-up d-100">
+      <button
+        class="od-tab"
+        [class.active]="activeTab === 'restaurant'"
+        (click)="setTab('restaurant')">
+        <i class="fa-solid fa-store"></i>
+        My Restaurant
+      </button>
+      <button
+        class="od-tab"
+        [class.active]="activeTab === 'menu'"
+        (click)="setTab('menu')"
+        [disabled]="!hasRestaurant">
+        <i class="fa-solid fa-utensils"></i>
+        Menu
+        <span class="tab-badge" *ngIf="menuItems.length > 0">
+          {{ menuItems.length }}
+        </span>
+      </button>
+      <button
+        class="od-tab"
+        [class.active]="activeTab === 'orders'"
+        (click)="setTab('orders')"
+        [disabled]="!hasRestaurant">
+        <i class="fa-solid fa-receipt"></i>
+        Orders
+        <span class="tab-badge orders"
+              *ngIf="orders.length > 0">
+          {{ orders.length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         TAB 1 — MY RESTAURANT
+    ══════════════════════════════════════════ -->
+    <div *ngIf="activeTab === 'restaurant'">
+
+      <!-- Loading skeleton -->
+      <div *ngIf="restaurantLoading" class="r-skeleton-wrap">
+        <div class="skeleton rs-img"></div>
+        <div class="rs-body">
+          <div class="skeleton rs-line w50"></div>
+          <div class="skeleton rs-line w30"></div>
+          <div class="skeleton rs-line w70"></div>
+        </div>
+      </div>
+
+      <!-- No restaurant yet — prompt to create -->
+      <div *ngIf="!restaurantLoading && !hasRestaurant && !showRestaurantForm"
+           class="no-restaurant">
+        <div class="nr-icon">
+          <i class="fa-solid fa-store-slash"></i>
+        </div>
+        <h2>No Restaurant Yet</h2>
+        <p>
+          Set up your restaurant profile to start
+          receiving orders from customers.
+        </p>
+        <button class="btn-brand" (click)="openRestaurantForm()">
+          <i class="fa-solid fa-plus"></i>
+          Create Restaurant
+        </button>
+      </div>
+
+      <!-- Restaurant detail card -->
+      <div *ngIf="!restaurantLoading && hasRestaurant
+                  && restaurant && !showRestaurantForm"
+           class="restaurant-card anim-fade-up">
+
+        <!-- hero image -->
+        <div class="rc-img-wrap">
+          <img [src]="getRestaurantImage(restaurant)"
+               [alt]="restaurant.name"
+               class="rc-img">
+          <div class="rc-img-scrim"></div>
+
+          <!-- status overlay on image -->
+          <div class="rc-img-status"
+               [class.is-open]="restaurant.open"
+               [class.is-closed]="!restaurant.open">
+            <span class="rc-s-dot"></span>
+            {{ restaurant.open ? 'Open' : 'Closed' }}
+          </div>
+        </div>
+
+        <!-- info body -->
+        <div class="rc-body">
+          <div class="rc-body-top">
+            <div>
+              <h2 class="rc-name">{{ restaurant.name }}</h2>
+              <div class="rc-cuisine">
+                <i class="fa-solid fa-utensils"></i>
+                {{ restaurant.cuisineType }}
+              </div>
+            </div>
+            <button class="edit-btn"
+                    (click)="openRestaurantForm()">
+              <i class="fa-solid fa-pen"></i>
+              Edit
+            </button>
+          </div>
+
+          <div class="rc-meta-grid">
+            <div class="rc-meta-item">
+              <i class="fa-solid fa-location-dot"></i>
+              <div>
+                <div class="rmi-label">Address</div>
+                <div class="rmi-value">
+                  {{ restaurant.address }}, {{ restaurant.city }}
+                </div>
+              </div>
+            </div>
+            <div class="rc-meta-item">
+              <i class="fa-solid fa-phone"></i>
+              <div>
+                <div class="rmi-label">Phone</div>
+                <div class="rmi-value">{{ restaurant.phone }}</div>
+              </div>
+            </div>
+            <div class="rc-meta-item">
+              <i class="fa-solid fa-star"></i>
+              <div>
+                <div class="rmi-label">Rating</div>
+                <div class="rmi-value">
+                  {{ restaurant.rating
+                     ? (restaurant.rating | number:'1.1-1')
+                     : 'No ratings yet' }}
+                </div>
+              </div>
+            </div>
+            <div class="rc-meta-item">
+              <i class="fa-regular fa-calendar"></i>
+              <div>
+                <div class="rmi-label">Member Since</div>
+                <div class="rmi-value">
+                  {{ restaurant.createdAt | date:'MMM yyyy' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Restaurant form (create / edit) ── -->
+      <div *ngIf="showRestaurantForm"
+           class="form-card anim-fade-up">
+
+        <div class="form-card-header">
+          <h2 class="form-title">
+            {{ hasRestaurant
+               ? 'Edit Restaurant'
+               : 'Create Restaurant' }}
+          </h2>
+          <button class="form-close"
+                  (click)="closeRestaurantForm()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form [formGroup]="restaurantForm"
+              class="form-body"
+              (ngSubmit)="saveRestaurant()">
+
+          <!-- Image upload -->
+          <div class="form-group full">
+            <label class="form-label">Restaurant Photo</label>
+            <app-image-upload
+              folder="foodrush/restaurants"
+              [currentUrl]="restaurantForm.get('imageUrl')?.value"
+              height="220px"
+              label="Upload Restaurant Photo"
+              (uploaded)="onRestaurantImageUploaded($event)">
+            </app-image-upload>
+          </div>
+
+          <!-- Name -->
+          <div class="form-group">
+            <label class="form-label">
+              Restaurant Name <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="name"
+              class="form-input"
+              [class.error]="isFieldInvalid(restaurantForm,'name')"
+              placeholder="e.g. Pizza Palace">
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(restaurantForm,'name')">
+              Restaurant name is required
+            </div>
+          </div>
+
+          <!-- Cuisine -->
+          <div class="form-group">
+            <label class="form-label">
+              Cuisine Type <span class="req">*</span>
+            </label>
+            <select
+              formControlName="cuisineType"
+              class="form-input"
+              [class.error]="isFieldInvalid(restaurantForm,'cuisineType')">
+              <option value="" disabled>Select cuisine</option>
+              <option *ngFor="let c of cuisineTypes"
+                      [value]="c">{{ c }}</option>
+            </select>
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(restaurantForm,'cuisineType')">
+              Please select a cuisine type
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="form-group full">
+            <label class="form-label">
+              Address <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="address"
+              class="form-input"
+              [class.error]="isFieldInvalid(restaurantForm,'address')"
+              placeholder="Street, area, locality">
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(restaurantForm,'address')">
+              Address is required
+            </div>
+          </div>
+
+          <!-- City -->
+          <div class="form-group">
+            <label class="form-label">
+              City <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="city"
+              class="form-input"
+              [class.error]="isFieldInvalid(restaurantForm,'city')"
+              placeholder="e.g. Bangalore">
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(restaurantForm,'city')">
+              City is required
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-group">
+            <label class="form-label">
+              Phone <span class="req">*</span>
+            </label>
+            <input
+              type="tel"
+              formControlName="phone"
+              class="form-input"
+              [class.error]="isFieldInvalid(restaurantForm,'phone')"
+              placeholder="10-digit mobile number">
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(restaurantForm,'phone')">
+              Enter a valid 10-digit phone number
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions full">
+            <button type="button"
+                    class="btn-cancel"
+                    (click)="closeRestaurantForm()">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="btn-brand"
+                    [disabled]="restaurantSaving">
+              <div class="btn-spinner"
+                   *ngIf="restaurantSaving"></div>
+              <i class="fa-solid fa-floppy-disk"
+                 *ngIf="!restaurantSaving"></i>
+              {{ restaurantSaving
+                 ? 'Saving...'
+                 : hasRestaurant ? 'Update Restaurant' : 'Create Restaurant' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         TAB 2 — MENU MANAGEMENT
+    ══════════════════════════════════════════ -->
+    <div *ngIf="activeTab === 'menu'">
+
+      <!-- toolbar -->
+      <div class="menu-toolbar anim-fade-up">
+        <div>
+          <h2 class="section-title">Menu Items</h2>
+          <p class="section-sub">
+            {{ menuItems.length }} item{{
+              menuItems.length !== 1 ? 's' : '' }} on your menu
+          </p>
+        </div>
+        <button class="btn-brand"
+                (click)="openAddMenu()"
+                *ngIf="menuFormMode === null">
+          <i class="fa-solid fa-plus"></i>
+          Add Item
+        </button>
+      </div>
+
+      <!-- Add / Edit menu item form -->
+      <div *ngIf="menuFormMode !== null"
+           class="form-card anim-fade-up">
+
+        <div class="form-card-header">
+          <h2 class="form-title">
+            {{ menuFormMode === 'add' ? 'Add Menu Item' : 'Edit Menu Item' }}
+          </h2>
+          <button class="form-close" (click)="closeMenuForm()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form [formGroup]="menuForm"
+              class="form-body"
+              (ngSubmit)="saveMenuItem()">
+
+          <!-- Image -->
+          <div class="form-group full">
+            <label class="form-label">Food Photo</label>
+            <app-image-upload
+              folder="foodrush/menu-items"
+              [currentUrl]="menuForm.get('imageUrl')?.value"
+              height="180px"
+              label="Upload Food Photo"
+              (uploaded)="onMenuImageUploaded($event)">
+            </app-image-upload>
+          </div>
+
+          <!-- Name -->
+          <div class="form-group">
+            <label class="form-label">
+              Item Name <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="name"
+              class="form-input"
+              [class.error]="isFieldInvalid(menuForm,'name')"
+              placeholder="e.g. Margherita Pizza">
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(menuForm,'name')">
+              Item name is required
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label class="form-label">
+              Category <span class="req">*</span>
+            </label>
+            <select
+              formControlName="category"
+              class="form-input"
+              [class.error]="isFieldInvalid(menuForm,'category')">
+              <option value="" disabled>Select category</option>
+              <option *ngFor="let c of menuCategories"
+                      [value]="c">{{ c }}</option>
+            </select>
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(menuForm,'category')">
+              Please select a category
+            </div>
+          </div>
+
+          <!-- Price -->
+          <div class="form-group">
+            <label class="form-label">
+              Price (₹) <span class="req">*</span>
+            </label>
+            <input
+              type="number"
+              formControlName="price"
+              class="form-input"
+              [class.error]="isFieldInvalid(menuForm,'price')"
+              placeholder="e.g. 249"
+              min="1">
+            <div class="form-error"
+                 *ngIf="isFieldInvalid(menuForm,'price')">
+              Enter a valid price
+            </div>
+          </div>
+
+          <!-- Veg toggle -->
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <div class="veg-toggle-row">
+              <div class="veg-opt"
+                   [class.active-veg]="menuForm.get('veg')?.value === true"
+                   (click)="menuForm.patchValue({veg: true})">
+                <div class="veg-dot veg"></div>
+                Veg
+              </div>
+              <div class="veg-opt"
+                   [class.active-nonveg]="menuForm.get('veg')?.value === false"
+                   (click)="menuForm.patchValue({veg: false})">
+                <div class="veg-dot nonveg"></div>
+                Non-Veg
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group full">
+            <label class="form-label">
+              Description
+              <span class="optional">(optional)</span>
+            </label>
+            <textarea
+              formControlName="description"
+              class="form-input form-textarea"
+              rows="2"
+              placeholder="Brief description of this dish...">
+            </textarea>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions full">
+            <button type="button"
+                    class="btn-cancel"
+                    (click)="closeMenuForm()">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="btn-brand"
+                    [disabled]="menuSaving">
+              <div class="btn-spinner"
+                   *ngIf="menuSaving"></div>
+              <i class="fa-solid fa-floppy-disk"
+                 *ngIf="!menuSaving"></i>
+              {{ menuSaving
+                 ? 'Saving...'
+                 : menuFormMode === 'add'
+                   ? 'Add to Menu'
+                   : 'Update Item' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Menu loading skeleton -->
+      <div *ngIf="menuLoading" class="menu-grid">
+        <div *ngFor="let s of skeletons" class="mi-skeleton">
+          <div class="skeleton mis-img"></div>
+          <div class="mis-body">
+            <div class="skeleton mis-line w60"></div>
+            <div class="skeleton mis-line w40"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu empty state -->
+      <div *ngIf="!menuLoading && menuItems.length === 0
+                  && menuFormMode === null"
+           class="menu-empty">
+        <i class="fa-solid fa-plate-wheat"></i>
+        <h3>No menu items yet</h3>
+        <p>Add your first item to start taking orders</p>
+        <button class="btn-brand" (click)="openAddMenu()">
+          <i class="fa-solid fa-plus"></i>
+          Add First Item
+        </button>
+      </div>
+
+      <!-- Menu groups -->
+      <div *ngIf="!menuLoading && menuItems.length > 0">
+        <div *ngFor="let group of menuGroups"
+             class="menu-group anim-fade-up">
+
+          <div class="mg-head">
+            <h3 class="mg-title">{{ group.category }}</h3>
+            <span class="mg-count">
+              {{ group.items.length }}
+            </span>
+          </div>
+
+          <div class="menu-items-list">
+            <div *ngFor="let item of group.items"
+                 class="menu-item-row"
+                 [class.unavailable]="!item.available">
+
+              <!-- image -->
+              <div class="mir-img-wrap">
+                <img [src]="getMenuImage(item)"
+                     [alt]="item.name"
+                     class="mir-img">
+                <div class="mir-veg"
+                     [class.veg]="item.veg"
+                     [class.nonveg]="!item.veg">
+                  <div class="mvd-inner"></div>
+                </div>
+              </div>
+
+              <!-- info -->
+              <div class="mir-info">
+                <div class="mir-name">{{ item.name }}</div>
+                <div class="mir-desc"
+                     *ngIf="item.description">
+                  {{ item.description }}
+                </div>
+              </div>
+
+              <!-- price -->
+              <div class="mir-price">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+                {{ item.price | number:'1.0-0' }}
+              </div>
+
+              <!-- availability toggle -->
+              <div class="mir-avail"
+                   [class.is-available]="item.available"
+                   (click)="toggleAvailability(item)"
+                   [title]="item.available ? 'Click to mark unavailable' : 'Click to mark available'">
+                <span class="avail-dot"></span>
+                {{ item.available ? 'Available' : 'Unavailable' }}
+              </div>
+
+              <!-- actions -->
+              <div class="mir-actions">
+                <button class="mir-btn edit"
+                        (click)="openEditMenu(item)"
+                        title="Edit item">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="mir-btn delete"
+        (click)="openDeleteModal(item)"
+        title="Delete item">
+  <i class="fa-solid fa-trash"></i>
+</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         TAB 3 — ORDERS
+    ══════════════════════════════════════════ -->
+    <div *ngIf="activeTab === 'orders'">
+
+      <!-- Toolbar with status filter -->
+      <div class="orders-toolbar anim-fade-up">
+        <div>
+          <h2 class="section-title">Incoming Orders</h2>
+          <p class="section-sub">
+            {{ filteredOrders.length }} order{{
+              filteredOrders.length !== 1 ? 's' : '' }}
+          </p>
+        </div>
+        <button class="refresh-btn"
+                (click)="loadOrders()">
+          <i class="fa-solid fa-rotate"></i>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Status filter chips -->
+      <div class="status-filters anim-fade-up d-100">
+        <button
+          class="sf-chip"
+          [class.active]="filterStatus === 'ALL'"
+          (click)="filterStatus = 'ALL'">
+          All
+        </button>
+        <button
+          *ngFor="let s of orderStatuses"
+          class="sf-chip"
+          [class.active]="filterStatus === s"
+          [style.--chip-color]="getStatusConfig(s).color"
+          (click)="filterStatus = s">
+          {{ getStatusConfig(s).label }}
+        </button>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div *ngIf="ordersLoading"
+           class="orders-list">
+        <div *ngFor="let s of skeletons"
+             class="order-sk">
+          <div class="skeleton osk-title"></div>
+          <div class="skeleton osk-meta"></div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!ordersLoading && filteredOrders.length === 0"
+           class="orders-empty">
+        <i class="fa-solid fa-receipt"></i>
+        <h3>No orders</h3>
+        <p>
+          {{ filterStatus === 'ALL'
+             ? 'Orders will appear here when customers place them'
+             : 'No orders with this status' }}
+        </p>
+      </div>
+
+      <!-- Orders list -->
+      <div *ngIf="!ordersLoading && filteredOrders.length > 0"
+           class="orders-list">
+
+        <div *ngFor="let order of filteredOrders; let i = index"
+             class="order-row anim-fade-up"
+             [style.animation-delay]="(i * 50) + 'ms'">
+
+          <!-- Left: order info -->
+          <div class="or-info">
+            <div class="or-id">
+              <i class="fa-solid fa-receipt"></i>
+              Order #{{ order.id }}
+            </div>
+            <div class="or-customer">
+              <i class="fa-solid fa-user"></i>
+              {{ order.customerName }}
+            </div>
+            <div class="or-items">
+              {{ order.orderItems.length }}
+              item{{ order.orderItems.length !== 1 ? 's' : '' }}
+              ·
+              <i class="fa-solid fa-indian-rupee-sign"
+                 style="font-size:10px"></i>
+              {{ order.totalAmount | number:'1.0-0' }}
+            </div>
+            <div class="or-address">
+              <i class="fa-solid fa-location-dot"></i>
+              {{ order.deliveryAddress }}
+            </div>
+            <div class="or-time">
+              <i class="fa-regular fa-clock"></i>
+              {{ order.createdAt | date:'dd MMM, hh:mm a' }}
+            </div>
+          </div>
+
+          <!-- Middle: ordered items summary -->
+          <div class="or-items-summary">
+            <div *ngFor="let item of order.orderItems"
+                 class="ois-row">
+              <span class="ois-name">{{ item.menuItemName }}</span>
+              <span class="ois-qty">× {{ item.quantity }}</span>
+            </div>
+            <div *ngIf="order.specialInstructions"
+                 class="ois-note">
+              <i class="fa-solid fa-note-sticky"></i>
+              {{ order.specialInstructions }}
+            </div>
+          </div>
+
+          <!-- Right: status + action buttons -->
+          <div class="or-right">
+
+            <!-- Current status badge -->
+            <div class="or-status"
+                 [style.color]="getStatusConfig(order.status).color"
+                 [style.background]="getStatusConfig(order.status).bg">
+              <i class="fa-solid"
+                 [class]="getStatusConfig(order.status).icon"></i>
+              {{ getStatusConfig(order.status).label }}
+            </div>
+
+            <!-- Next status action buttons -->
+            <div class="or-next-actions"
+                 *ngIf="getNextStatuses(order.status).length > 0">
+              <button
+                *ngFor="let nextStatus of getNextStatuses(order.status)"
+                class="next-status-btn"
+                [class.danger]="nextStatus === 'CANCELLED'"
+                [disabled]="updatingOrderId === order.id"
+                (click)="updateOrderStatus(order, nextStatus)">
+                <div class="btn-spinner"
+                     *ngIf="updatingOrderId === order.id"></div>
+                <ng-container
+                  *ngIf="updatingOrderId !== order.id">
+                  {{ getStatusConfig(nextStatus).label }}
+                </ng-container>
+              </button>
+            </div>
+
+            <!-- Final states — no actions available -->
+            <div class="or-final"
+                 *ngIf="getNextStatuses(order.status).length === 0">
+              <i class="fa-solid fa-lock"></i>
+              Final status
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <!-- ══════════════════════════════════════════
+     DELETE CONFIRMATION MODAL
+══════════════════════════════════════════ -->
+<div class="del-overlay"
+     *ngIf="showDeleteModal"
+     (click)="closeDeleteModal()">
+</div>
+
+<div class="del-modal" *ngIf="showDeleteModal">
+
+  <!-- Warning icon -->
+  <div class="dm-icon-wrap">
+    <div class="dm-icon">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <h2 class="dm-title">Delete Menu Item?</h2>
+  <p class="dm-subtitle">
+    This item will be permanently removed from your menu.
+    This action cannot be undone.
+  </p>
+
+  <!-- Item preview card -->
+  <div class="dm-item-preview" *ngIf="deletingItem">
+    <div class="dip-img-wrap">
+      <img [src]="getMenuImage(deletingItem)"
+           [alt]="deletingItem.name"
+           class="dip-img">
+    </div>
+    <div class="dip-info">
+      <div class="dip-name">{{ deletingItem.name }}</div>
+      <div class="dip-meta">
+        <span class="dip-category">{{ deletingItem.category }}</span>
+        <span class="dip-dot"></span>
+        <span class="dip-price">
+          <i class="fa-solid fa-indian-rupee-sign"></i>
+          {{ deletingItem.price | number:'1.0-0' }}
+        </span>
+      </div>
+      <!-- veg/nonveg indicator -->
+      <div class="dip-veg"
+           [class.is-veg]="deletingItem.veg"
+           [class.is-nonveg]="!deletingItem.veg">
+        <div class="dip-veg-dot"></div>
+        {{ deletingItem.veg ? 'Vegetarian' : 'Non-Vegetarian' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="dm-actions">
+    <button class="dm-cancel"
+            (click)="closeDeleteModal()"
+            [disabled]="deleteInProgress">
+      <i class="fa-solid fa-xmark"></i>
+      Keep Item
+    </button>
+    <button class="dm-delete"
+            (click)="confirmDelete()"
+            [disabled]="deleteInProgress">
+      <div class="btn-spinner" *ngIf="deleteInProgress"></div>
+      <i class="fa-solid fa-trash"
+         *ngIf="!deleteInProgress"></i>
+      {{ deleteInProgress ? 'Deleting...' : 'Yes, Delete' }}
+    </button>
+  </div>
+
+</div>
+</div>

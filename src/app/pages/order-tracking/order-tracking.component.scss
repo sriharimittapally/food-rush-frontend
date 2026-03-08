@@ -1,0 +1,530 @@
+.track-root {
+  min-height: 100vh;
+  padding-top: 72px;
+  padding-bottom: 60px;
+  background: var(--bg-canvas);
+}
+
+.container-app { padding-top: 24px; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-base);
+  border-radius: var(--r-md);
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 200ms;
+  margin-bottom: 24px;
+
+  i { font-size: 12px; }
+
+  &:hover {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+  }
+}
+
+// ─── Skeleton ─────────────────────────────────
+.track-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .ts-header   { height: 80px;  border-radius: var(--r-lg); }
+  .ts-map      { height: 360px; border-radius: var(--r-xl); }
+  .ts-timeline { height: 120px; border-radius: var(--r-lg); }
+}
+
+// ─── Header ───────────────────────────────────
+.track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.th-order-id {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-primary);
+  margin-bottom: 4px;
+
+  i { font-size: 11px; }
+}
+
+.th-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.th-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+
+  i { font-size: 11px; }
+}
+
+.th-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 99px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+
+  i { font-size: 13px; }
+}
+
+// ─── Cancelled card ───────────────────────────
+.cancelled-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 20px;
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--r-xl);
+
+  i {
+    font-size: 56px;
+    color: var(--danger);
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+  }
+}
+
+.btn-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--brand-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--r-md);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 200ms;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(249,68,10,0.35);
+  }
+}
+
+// ─── Two column grid ──────────────────────────
+.track-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 1024px) { grid-template-columns: 1fr; }
+}
+
+.track-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.track-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: calc(72px + 16px);
+}
+
+// ─── Map card ─────────────────────────────────
+.map-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+
+.mc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-base);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+
+  i { font-size: 14px; color: var(--brand-primary); }
+}
+
+.live-dot {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #22C55E;
+  letter-spacing: 0.08em;
+}
+
+.ld-pulse {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #22C55E;
+  display: block;
+  animation: livePulse 1.2s ease infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1);   }
+  50%       { opacity: 0.4; transform: scale(1.4); }
+}
+
+.tracking-map {
+  height: 360px;
+  width: 100%;
+
+  @media (max-width: 768px) { height: 280px; }
+}
+
+.map-legend {
+  display: flex;
+  gap: 20px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-base);
+}
+
+.ml-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.ml-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+
+  &.restaurant { background: #8B5CF6; }
+  &.rider      { background: #F97316; }
+  &.home       { background: #22C55E; }
+}
+
+// ─── Timeline card ────────────────────────────
+.timeline-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--r-xl);
+  padding: 24px;
+}
+
+.tc-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+
+.timeline {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  gap: 0;
+}
+
+.tl-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 8px;
+
+  // connector line between steps
+  &:not(:last-child) .tl-line {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    width: 100%;
+    height: 3px;
+    background: var(--border-base);
+    z-index: 0;
+    transition: background 500ms;
+  }
+
+  &.done:not(:last-child) .tl-line {
+    background: var(--brand-primary);
+  }
+
+  &.active:not(:last-child) .tl-line {
+    background: linear-gradient(
+      to right, var(--brand-primary) 30%, var(--border-base) 100%
+    );
+  }
+}
+
+.tl-icon {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  position: relative;
+  z-index: 1;
+  transition: all 300ms;
+  border: 2.5px solid var(--border-base);
+  background: var(--bg-elevated);
+  color: var(--text-tertiary);
+
+  .done & {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(249,68,10,0.3);
+  }
+
+  .active & {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: white;
+    box-shadow: 0 4px 16px rgba(249,68,10,0.4);
+    animation: iconBounce 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+}
+
+@keyframes iconBounce {
+  from { transform: scale(0.7); }
+  to   { transform: scale(1); }
+}
+
+.tl-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--brand-primary);
+  animation: tlPulse 1.5s ease infinite;
+}
+
+@keyframes tlPulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  100% { transform: scale(1.5); opacity: 0;   }
+}
+
+.tl-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-align: center;
+  line-height: 1.3;
+
+  .done &, .active & {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+}
+
+// ─── Detail cards ─────────────────────────────
+.detail-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--r-lg);
+  padding: 16px;
+}
+
+.dc-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+
+  i { font-size: 11px; color: var(--brand-primary); }
+}
+
+.dc-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+// ─── Items card ───────────────────────────────
+.items-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.ic-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+  padding: 16px;
+  border-bottom: 1px solid var(--border-base);
+
+  i { font-size: 13px; color: var(--brand-primary); }
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-base);
+
+  &:last-child { border-bottom: none; }
+}
+
+.ir-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ir-dot {
+  width: 13px; height: 13px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid currentColor;
+  flex-shrink: 0;
+
+  &.veg    { color: #22C55E; }
+  &.nonveg { color: #EF4444; }
+}
+
+.ird-inner {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ir-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ir-qty {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.ir-price {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+
+  i { font-size: 9px; }
+}
+
+.items-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-top: 2px solid var(--border-base);
+}
+
+.it-amount {
+  font-size: 18px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  i { font-size: 12px; }
+}
+
+// ─── Map custom markers ────────────────────────
+// These go in global styles.scss not here
+// because Leaflet renders outside Angular
+
+// ─── Animations ────────────────────────────────
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-fade-up { animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.d-50  { animation-delay: 50ms;  }
+.d-100 { animation-delay: 100ms; }

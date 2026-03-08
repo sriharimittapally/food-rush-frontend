@@ -1,1 +1,129 @@
-<p>orders works!</p>
+<div class="orders-root">
+  <div class="container-app">
+
+    <!-- Header -->
+    <div class="orders-header anim-fade-up">
+      <div>
+        <h1 class="orders-title">My Orders</h1>
+        <p class="orders-sub">
+          {{ orders.length }} order{{ orders.length !== 1 ? 's' : '' }}
+          placed
+        </p>
+      </div>
+      <button class="browse-btn"
+              (click)="browsRestaurants()">
+        <i class="fa-solid fa-utensils"></i>
+        Browse Restaurants
+      </button>
+    </div>
+
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="orders-list">
+      <div *ngFor="let s of skeletons" class="order-skeleton">
+        <div class="os-header">
+          <div class="skeleton os-title"></div>
+          <div class="skeleton os-badge"></div>
+        </div>
+        <div class="skeleton os-meta"></div>
+        <div class="skeleton os-meta w40"></div>
+      </div>
+    </div>
+
+    <!-- Orders list -->
+    <div *ngIf="!loading && orders.length > 0"
+         class="orders-list">
+
+      <div
+        *ngFor="let order of orders; let i = index"
+        class="order-card anim-fade-up"
+        [style.animation-delay]="(i * 60) + 'ms'"
+        [class.expanded]="expandedOrderId === order.id">
+
+        <!-- Card header — always visible -->
+        <div class="oc-header" (click)="toggleExpand(order.id)">
+
+          <div class="oc-left">
+            <div class="oc-id">
+              <i class="fa-solid fa-receipt"></i>
+              Order #{{ order.id }}
+            </div>
+            <div class="oc-restaurant">
+              {{ order.restaurantName }}
+            </div>
+          </div>
+
+          <div class="oc-right">
+            <!-- status badge -->
+            <div class="oc-status"
+                 [style.color]="getStatusConfig(order.status).color"
+                 [style.background]="getStatusConfig(order.status).bg">
+              <i class="fa-solid"
+                 [class]="getStatusConfig(order.status).icon"></i>
+              {{ getStatusConfig(order.status).label }}
+            </div>
+
+            <div class="oc-amount">
+              <i class="fa-solid fa-indian-rupee-sign"></i>
+              {{ order.totalAmount | number:'1.0-0' }}
+            </div>
+
+            <div class="oc-chevron">
+              <i class="fa-solid fa-chevron-down"></i>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Meta row -->
+        <div class="oc-meta">
+          <span class="oc-meta-item">
+            <i class="fa-regular fa-calendar"></i>
+            {{ order.createdAt | date:'dd MMM yyyy, hh:mm a' }}
+          </span>
+          <span class="oc-meta-sep"></span>
+          <span class="oc-meta-item">
+            <i class="fa-solid fa-box"></i>
+            {{ order.orderItems.length }}
+            item{{ order.orderItems.length !== 1 ? 's' : '' }}
+          </span>
+          <span class="oc-meta-sep"></span>
+          <span class="oc-meta-item">
+            <i class="fa-solid fa-location-dot"></i>
+            {{ order.deliveryAddress }}
+          </span>
+        </div>
+
+        <!-- Expanded details -->
+        <div class="oc-details"
+             *ngIf="expandedOrderId === order.id">
+
+          <!-- ordered items -->
+          <div class="oc-items">
+            <div class="oci-header">Order Items</div>
+            <div class="oci-row"
+                 *ngFor="let item of order.orderItems">
+              <div class="oci-left">
+                <!-- veg/nonveg dot -->
+                <div class="oci-dot"
+                     [class.veg]="item.veg"
+                     [class.nonveg]="!item.veg">
+                  <div class="oci-dot-inner"></div>
+                </div>
+                <span class="oci-name">{{ item.menuItemName }}</span>
+                <span class="oci-qty">× {{ item.quantity }}</span>
+              </div>
+              <div class="oci-price">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+                {{ item.subtotal | number:'1.0-0' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- special instructions if any -->
+          <div class="oc-instructions"
+               *ngIf="order.specialInstructions">
+            <i class="fa-solid fa-note-sticky"></i>
+            {{ order.specialInstructions }}
+          </div>
+
+          

@@ -1,0 +1,62 @@
+.nf-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-canvas);
+  padding: 20px;
+  text-align: center;
+}
+
+.nf-code {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(80px, 15vw, 140px);
+  font-weight: 900;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.nf-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.nf-sub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 380px;
+  line-height: 1.6;
+  margin: 0 auto 32px;
+}
+
+.btn-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 28px;
+  background: var(--brand-gradient);
+  color: white;
+  border-radius: var(--r-lg);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all 250ms;
+  box-shadow: 0 4px 20px rgba(249,68,10,0.3);
+
+  i { font-size: 14px; }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(249,68,10,0.45);
+    color: white;
+  }
+}

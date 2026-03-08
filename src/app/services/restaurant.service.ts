@@ -56,8 +56,16 @@ export class RestaurantService {
   }
 
   // ─── Admin ────────────────────────────────
-  deleteRestaurant(id: number): Observable<void> {
-    return this.http.delete<void>(
-      `${this.adm}/restaurants/${id}`);
-  }
+  getAllForAdmin(): Observable<Restaurant[]> {
+  return this.http.get<Restaurant[]>(
+    `${this.adm}/restaurants`
+  );
+}
+
+  deleteRestaurant(id: number): Observable<any> {
+  return this.http.delete(
+    `${this.adm}/restaurants/${id}`,
+    { responseType: 'text' }  // ← add this
+  );
+}
 }

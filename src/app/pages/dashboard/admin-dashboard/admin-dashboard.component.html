@@ -1,1 +1,592 @@
-<p>admin-dashboard works!</p>
+<div class="ad-root">
+  <div class="container-app">
+
+    <!-- ══════════════════════
+         HEADER
+    ══════════════════════ -->
+    <div class="ad-header anim-fade-up">
+      <div>
+        <h1 class="ad-title">
+          <i class="fa-solid fa-shield-halved"></i>
+          Admin Dashboard
+        </h1>
+        <p class="ad-sub">
+          Platform overview · {{ users.length }} users ·
+          {{ restaurants.length }} restaurants ·
+          {{ orders.length }} orders
+        </p>
+      </div>
+      <button class="refresh-btn" (click)="loadAll()">
+        <i class="fa-solid fa-rotate"></i>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Global loading skeleton -->
+    <div *ngIf="loading" class="global-skeleton">
+      <div class="gs-stats">
+        <div *ngFor="let s of skeletons" class="skeleton gs-stat"></div>
+      </div>
+      <div class="skeleton gs-tab"></div>
+      <div class="skeleton gs-content"></div>
+    </div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- ══════════════════════
+           STATS STRIP
+      ══════════════════════ -->
+      <div class="stats-strip anim-fade-up d-100">
+
+        <div class="stat-card">
+          <div class="sc-icon users">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div class="sc-body">
+            <div class="sc-value">{{ users.length }}</div>
+            <div class="sc-label">Total Users</div>
+          </div>
+          <div class="sc-sub">
+            {{ totalCustomers }} customers ·
+            {{ totalOwners }} owners
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="sc-icon restaurants">
+            <i class="fa-solid fa-store"></i>
+          </div>
+          <div class="sc-body">
+            <div class="sc-value">{{ restaurants.length }}</div>
+            <div class="sc-label">Restaurants</div>
+          </div>
+          <div class="sc-sub">
+            {{ openRestaurants }} currently open
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="sc-icon orders">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <div class="sc-body">
+            <div class="sc-value">{{ orders.length }}</div>
+            <div class="sc-label">Total Orders</div>
+          </div>
+          <div class="sc-sub">
+            {{ pendingOrders }} pending ·
+            {{ deliveredOrders }} delivered
+          </div>
+        </div>
+
+        <div class="stat-card revenue">
+          <div class="sc-icon rev">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+          <div class="sc-body">
+            <div class="sc-value">
+              ₹{{ totalRevenue | number:'1.0-0' }}
+            </div>
+            <div class="sc-label">Total Revenue</div>
+          </div>
+          <div class="sc-sub">from delivered orders</div>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════
+           TABS
+      ══════════════════════ -->
+      <div class="ad-tabs anim-fade-up d-200">
+        <button class="ad-tab"
+                [class.active]="activeTab === 'overview'"
+                (click)="setTab('overview')">
+          <i class="fa-solid fa-chart-pie"></i>
+          Overview
+        </button>
+        <button class="ad-tab"
+                [class.active]="activeTab === 'users'"
+                (click)="setTab('users')">
+          <i class="fa-solid fa-users"></i>
+          Users
+          <span class="tab-badge">{{ users.length }}</span>
+        </button>
+        <button class="ad-tab"
+                [class.active]="activeTab === 'restaurants'"
+                (click)="setTab('restaurants')">
+          <i class="fa-solid fa-store"></i>
+          Restaurants
+          <span class="tab-badge">{{ restaurants.length }}</span>
+        </button>
+        <button class="ad-tab"
+                [class.active]="activeTab === 'orders'"
+                (click)="setTab('orders')">
+          <i class="fa-solid fa-receipt"></i>
+          Orders
+          <span class="tab-badge">{{ orders.length }}</span>
+        </button>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           TAB 1 — OVERVIEW
+      ══════════════════════════════════════════ -->
+      <div *ngIf="activeTab === 'overview'"
+           class="overview-grid anim-fade-up">
+
+        <!-- Order status breakdown -->
+        <div class="ov-card">
+          <h3 class="ov-title">
+            <i class="fa-solid fa-chart-bar"></i>
+            Orders by Status
+          </h3>
+          <div class="status-breakdown">
+            <div *ngFor="let s of orderStatuses"
+                 class="sb-row">
+              <div class="sb-label">
+                <div class="sb-dot"
+                     [style.background]="getStatusConfig(s).color">
+                </div>
+                {{ getStatusConfig(s).label }}
+              </div>
+              <div class="sb-bar-wrap">
+                <div class="sb-bar"
+                     [style.width.%]="orders.length
+                       ? (orders | statusCount:s) / orders.length * 100
+                       : 0"
+                     [style.background]="getStatusConfig(s).color">
+                </div>
+              </div>
+              <div class="sb-count">
+                {{ orders | statusCount:s }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent orders -->
+        <div class="ov-card">
+          <h3 class="ov-title">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Recent Orders
+          </h3>
+          <div class="recent-orders">
+            <div *ngFor="let o of orders | slice:0:6"
+                 class="ro-row">
+              <div class="ro-left">
+                <div class="ro-id">#{{ o.id }}</div>
+                <div class="ro-name">{{ o.customerName }}</div>
+                <div class="ro-rest">{{ o.restaurantName }}</div>
+              </div>
+              <div class="ro-right">
+                <div class="ro-status"
+                     [style.color]="getStatusConfig(o.status).color"
+                     [style.background]="getStatusConfig(o.status).bg">
+                  {{ getStatusConfig(o.status).label }}
+                </div>
+                <div class="ro-amount">
+                  ₹{{ o.totalAmount | number:'1.0-0' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User breakdown -->
+        <div class="ov-card">
+          <h3 class="ov-title">
+            <i class="fa-solid fa-users"></i>
+            User Breakdown
+          </h3>
+          <div class="user-breakdown">
+            <div class="ub-item">
+              <div class="ub-icon customer">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="ub-info">
+                <div class="ub-count">{{ totalCustomers }}</div>
+                <div class="ub-label">Customers</div>
+              </div>
+            </div>
+            <div class="ub-item">
+              <div class="ub-icon owner">
+                <i class="fa-solid fa-store"></i>
+              </div>
+              <div class="ub-info">
+                <div class="ub-count">{{ totalOwners }}</div>
+                <div class="ub-label">Owners</div>
+              </div>
+            </div>
+            <div class="ub-item">
+              <div class="ub-icon admin">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div class="ub-info">
+                <div class="ub-count">
+                  {{ users.length - totalCustomers - totalOwners }}
+                </div>
+                <div class="ub-label">Admins</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top restaurants by city -->
+        <div class="ov-card">
+          <h3 class="ov-title">
+            <i class="fa-solid fa-location-dot"></i>
+            Restaurants by City
+          </h3>
+          <div class="city-list">
+            <div *ngFor="let city of cityGroups | slice:0:6"
+                 class="city-row">
+              <div class="city-name">{{ city.name }}</div>
+              <div class="city-count">
+                {{ city.count }} restaurant{{
+                  city.count !== 1 ? 's' : '' }}
+              </div>
+            </div>
+            <div *ngIf="restaurants.length === 0"
+                 class="empty-small">
+              No restaurants yet
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           TAB 2 — USERS
+      ══════════════════════════════════════════ -->
+      <div *ngIf="activeTab === 'users'">
+
+        <!-- Toolbar -->
+        <div class="tab-toolbar anim-fade-up">
+          <div>
+            <h2 class="section-title">All Users</h2>
+            <p class="section-sub">
+              {{ filteredUsers.length }} of {{ users.length }} users
+            </p>
+          </div>
+          <div class="toolbar-right">
+            <!-- Search -->
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                [(ngModel)]="userSearch"
+                placeholder="Search name or email...">
+            </div>
+            <!-- Role filter -->
+            <div class="role-filters">
+              <button class="rf-chip"
+                      [class.active]="userRoleFilter === 'ALL'"
+                      (click)="userRoleFilter = 'ALL'">All</button>
+              <button class="rf-chip"
+                      [class.active]="userRoleFilter === 'CUSTOMER'"
+                      (click)="userRoleFilter = 'CUSTOMER'">
+                Customers
+              </button>
+              <button class="rf-chip"
+                      [class.active]="userRoleFilter === 'RESTAURANT_OWNER'"
+                      (click)="userRoleFilter = 'RESTAURANT_OWNER'">
+                Owners
+              </button>
+              <button class="rf-chip"
+                      [class.active]="userRoleFilter === 'ADMIN'"
+                      (click)="userRoleFilter = 'ADMIN'">
+                Admins
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users table -->
+        <div class="users-table anim-fade-up d-100">
+          <div class="ut-head">
+            <div class="ut-col name">User</div>
+            <div class="ut-col">Phone</div>
+            <div class="ut-col">Role</div>
+            <div class="ut-col">Status</div>
+            <div class="ut-col">Joined</div>
+          </div>
+
+          <div *ngFor="let user of filteredUsers; let i = index"
+               class="ut-row anim-fade-up"
+               [style.animation-delay]="(i * 40) + 'ms'">
+
+            <!-- Avatar + name + email -->
+            <div class="ut-col name">
+              <div class="u-avatar">
+                {{ user.fullName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="u-info">
+                <div class="u-name">{{ user.fullName }}</div>
+                <div class="u-email">{{ user.email }}</div>
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="ut-col u-phone">
+              {{ user.phone || '—' }}
+            </div>
+
+            <!-- Role badge -->
+            <div class="ut-col">
+              <div class="role-badge"
+                   [style.color]="getRoleConfig(user.role).color"
+                   [style.background]="getRoleConfig(user.role).bg">
+                {{ getRoleConfig(user.role).label }}
+              </div>
+            </div>
+
+            <!-- Active status -->
+            <div class="ut-col">
+              <div class="status-pill"
+                   [class.active]="user.active"
+                   [class.inactive]="!user.active">
+                <span class="sp-dot"></span>
+                {{ user.active ? 'Active' : 'Inactive' }}
+              </div>
+            </div>
+
+            <!-- Joined date -->
+            <div class="ut-col u-date">
+              {{ user.createdAt | date:'dd MMM yyyy' }}
+            </div>
+
+          </div>
+
+          <!-- Empty state -->
+          <div *ngIf="filteredUsers.length === 0"
+               class="table-empty">
+            <i class="fa-solid fa-users-slash"></i>
+            <p>No users found</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           TAB 3 — RESTAURANTS
+      ══════════════════════════════════════════ -->
+      <div *ngIf="activeTab === 'restaurants'">
+
+        <div class="tab-toolbar anim-fade-up">
+          <div>
+            <h2 class="section-title">All Restaurants</h2>
+            <p class="section-sub">
+              {{ filteredRestaurants.length }} restaurants
+            </p>
+          </div>
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+              type="text"
+              [(ngModel)]="restSearch"
+              placeholder="Search name, city, cuisine...">
+          </div>
+        </div>
+
+        <div class="rest-grid anim-fade-up d-100">
+          <div *ngFor="let r of filteredRestaurants; let i = index"
+               class="rest-card anim-fade-up"
+               [style.animation-delay]="(i * 50) + 'ms'">
+
+            <!-- Image -->
+            <div class="rc-img-wrap">
+              <img [src]="getRestaurantImage(r)"
+                   [alt]="r.name"
+                   class="rc-img">
+              <div class="rc-status"
+                   [class.open]="r.open"
+                   [class.closed]="!r.open">
+                <span class="rcs-dot"></span>
+                {{ r.open ? 'Open' : 'Closed' }}
+              </div>
+            </div>
+
+            <!-- Info -->
+            <div class="rc-body">
+              <div class="rc-name">{{ r.name }}</div>
+              <div class="rc-meta">
+                <span>
+                  <i class="fa-solid fa-utensils"></i>
+                  {{ r.cuisineType }}
+                </span>
+                <span>
+                  <i class="fa-solid fa-location-dot"></i>
+                  {{ r.city }}
+                </span>
+              </div>
+              <div class="rc-rating" *ngIf="r.rating">
+                <i class="fa-solid fa-star"></i>
+                {{ r.rating | number:'1.1-1' }}
+              </div>
+            </div>
+
+            <!-- Delete button -->
+            <button class="rc-delete"
+                    (click)="openDeleteRestaurantModal(r)"
+                    title="Delete restaurant">
+              <i class="fa-solid fa-trash"></i>
+              Delete
+            </button>
+
+          </div>
+
+          <div *ngIf="filteredRestaurants.length === 0"
+               class="grid-empty">
+            <i class="fa-solid fa-store-slash"></i>
+            <p>No restaurants found</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           TAB 4 — ORDERS
+      ══════════════════════════════════════════ -->
+      <div *ngIf="activeTab === 'orders'">
+
+        <div class="tab-toolbar anim-fade-up">
+          <div>
+            <h2 class="section-title">All Orders</h2>
+            <p class="section-sub">
+              {{ filteredOrders.length }} orders
+            </p>
+          </div>
+          <button class="refresh-btn" (click)="loadAll()">
+            <i class="fa-solid fa-rotate"></i>
+            Refresh
+          </button>
+        </div>
+
+        <!-- Status filter -->
+        <div class="status-chips anim-fade-up d-100">
+          <button class="sc-chip"
+                  [class.active]="orderStatusFilter === 'ALL'"
+                  (click)="orderStatusFilter = 'ALL'">All</button>
+          <button *ngFor="let s of orderStatuses"
+                  class="sc-chip"
+                  [class.active]="orderStatusFilter === s"
+                  [style.--chip-color]="getStatusConfig(s).color"
+                  (click)="orderStatusFilter = s">
+            {{ getStatusConfig(s).label }}
+          </button>
+        </div>
+
+        <!-- Orders list -->
+        <div class="orders-list anim-fade-up d-200">
+          <div *ngFor="let o of filteredOrders; let i = index"
+               class="order-row anim-fade-up"
+               [style.animation-delay]="(i * 40) + 'ms'">
+
+            <div class="or-section">
+              <div class="or-id">
+                <i class="fa-solid fa-receipt"></i>
+                #{{ o.id }}
+              </div>
+              <div class="or-customer">{{ o.customerName }}</div>
+              <div class="or-restaurant">
+                <i class="fa-solid fa-store"></i>
+                {{ o.restaurantName }}
+              </div>
+            </div>
+
+            <div class="or-section">
+              <div class="or-address">
+                <i class="fa-solid fa-location-dot"></i>
+                {{ o.deliveryAddress }}
+              </div>
+              <div class="or-time">
+                <i class="fa-regular fa-clock"></i>
+                {{ o.createdAt | date:'dd MMM, hh:mm a' }}
+              </div>
+            </div>
+
+            <div class="or-section right">
+              <div class="or-status"
+                   [style.color]="getStatusConfig(o.status).color"
+                   [style.background]="getStatusConfig(o.status).bg">
+                <i class="fa-solid"
+                   [class]="getStatusConfig(o.status).icon"></i>
+                {{ getStatusConfig(o.status).label }}
+              </div>
+              <div class="or-amount">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+                {{ o.totalAmount | number:'1.0-0' }}
+              </div>
+              <div class="or-items-count">
+                {{ o.orderItems.length }} item{{
+                  o.orderItems.length !== 1 ? 's' : '' }}
+              </div>
+            </div>
+
+          </div>
+
+          <div *ngIf="filteredOrders.length === 0"
+               class="orders-empty">
+            <i class="fa-solid fa-receipt"></i>
+            <p>No orders found</p>
+          </div>
+        </div>
+
+      </div>
+
+    </ng-container>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       DELETE RESTAURANT MODAL
+  ══════════════════════════════════════════ -->
+  <div class="del-overlay"
+       *ngIf="showDeleteModal"
+       (click)="closeDeleteRestaurantModal()">
+  </div>
+
+  <div class="del-modal" *ngIf="showDeleteModal">
+
+    <div class="dm-icon-wrap">
+      <div class="dm-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+    </div>
+
+    <h2 class="dm-title">Delete Restaurant?</h2>
+    <p class="dm-subtitle">
+      This will permanently delete the restaurant and all its
+      menu items. This action cannot be undone.
+    </p>
+
+    <div class="dm-preview" *ngIf="deletingRestaurant">
+      <img [src]="getRestaurantImage(deletingRestaurant)"
+           class="dmp-img"
+           [alt]="deletingRestaurant.name">
+      <div class="dmp-info">
+        <div class="dmp-name">{{ deletingRestaurant.name }}</div>
+        <div class="dmp-meta">
+          {{ deletingRestaurant.cuisineType }} ·
+          {{ deletingRestaurant.city }}
+        </div>
+      </div>
+    </div>
+
+    <div class="dm-actions">
+      <button class="dm-cancel"
+              (click)="closeDeleteRestaurantModal()"
+              [disabled]="deleteInProgress">
+        <i class="fa-solid fa-xmark"></i>
+        Cancel
+      </button>
+      <button class="dm-delete"
+              (click)="confirmDeleteRestaurant()"
+              [disabled]="deleteInProgress">
+        <div class="btn-spinner" *ngIf="deleteInProgress"></div>
+        <i class="fa-solid fa-trash" *ngIf="!deleteInProgress"></i>
+        {{ deleteInProgress ? 'Deleting...' : 'Yes, Delete' }}
+      </button>
+    </div>
+
+  </div>
+
+</div>

@@ -39,6 +39,10 @@ import { OwnerDashboardComponent }
 import { AdminDashboardComponent }
   from './pages/dashboard/admin-dashboard/admin-dashboard.component';
 import { ImageUploadComponent } from './components/image-upload/image-upload.component';
+import { StatusCountPipe } from './pipes/status-count.pipe';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
+import { OrderTrackingComponent } from './pages/order-tracking/order-tracking.component';
 
 @NgModule({
   declarations: [
@@ -57,6 +61,10 @@ import { ImageUploadComponent } from './components/image-upload/image-upload.com
     OwnerDashboardComponent,
     AdminDashboardComponent,
     ImageUploadComponent,
+    StatusCountPipe,
+    NotFoundComponent,
+    LoadingSpinnerComponent,
+    OrderTrackingComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,1 +1,331 @@
-<p>restaurant-detail works!</p>
+<div class="rd-root">
+
+  <!-- ══════════════════════════════════
+       LOADING STATE — full page skeleton
+  ══════════════════════════════════ -->
+  <ng-container *ngIf="loading">
+    <div class="rd-hero-skeleton">
+      <div class="skeleton rhs-img"></div>
+      <div class="container-app rhs-body">
+        <div class="skeleton rhs-title"></div>
+        <div class="skeleton rhs-sub"></div>
+        <div class="skeleton rhs-meta"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══════════════════════════════════
+       RESTAURANT HERO
+  ══════════════════════════════════ -->
+  <ng-container *ngIf="!loading && restaurant">
+
+    <div class="rd-hero">
+
+      <!-- full width restaurant image -->
+      <div class="rd-hero-img-wrap">
+        <img
+          [src]="getRestaurantImage(restaurant)"
+          [alt]="restaurant.name"
+          class="rd-hero-img">
+        <div class="rd-hero-scrim"></div>
+
+        <!-- back button -->
+        <button class="rd-back-btn" (click)="goBack()">
+          <i class="fa-solid fa-arrow-left"></i>
+          Back
+        </button>
+      </div>
+
+      <!-- restaurant info card sitting over the image -->
+      <div class="container-app">
+        <div class="rd-info-card">
+
+          <!-- left: name, cuisine, meta -->
+          <div class="rd-info-left">
+            <div class="rd-status-row">
+              <span class="rd-status-badge"
+                    [class.is-open]="restaurant.open"
+                    [class.is-closed]="!restaurant.open">
+                <span class="rd-status-dot"></span>
+                {{ restaurant.open ? 'Open Now' : 'Closed' }}
+              </span>
+              <span class="rd-cuisine-tag">
+                <i class="fa-solid fa-utensils"></i>
+                {{ restaurant.cuisineType || 'Multi-cuisine' }}
+              </span>
+            </div>
+
+            <h1 class="rd-name">{{ restaurant.name }}</h1>
+
+            <div class="rd-meta-row">
+              <div class="rd-meta-item">
+                <i class="fa-solid fa-location-dot"></i>
+                {{ restaurant.address }}, {{ restaurant.city }}
+              </div>
+              <div class="rd-meta-item">
+                <i class="fa-solid fa-phone"></i>
+                {{ restaurant.phone }}
+              </div>
+              <div class="rd-meta-item">
+                <i class="fa-regular fa-clock"></i>
+                25-35 min delivery
+              </div>
+              <div class="rd-meta-item">
+                <i class="fa-solid fa-motorcycle"></i>
+                Free delivery
+              </div>
+            </div>
+          </div>
+
+          <!-- right: rating + cart button -->
+          <div class="rd-info-right">
+            <div class="rd-rating-box" *ngIf="restaurant.rating">
+              <div class="rd-rating-val">
+                {{ restaurant.rating | number:'1.1-1' }}
+              </div>
+              <div class="rd-rating-stars">
+                <i class="fa-solid fa-star"
+                   *ngFor="let s of [1,2,3,4,5]"
+                   [class.lit]="s <= restaurant.rating"></i>
+              </div>
+              <div class="rd-rating-lbl">Rating</div>
+            </div>
+
+            <!-- cart button — only shown when cart has items -->
+            <button
+              *ngIf="(cart.cartCount$ | async)! > 0"
+              class="rd-cart-btn"
+              (click)="goToCart()">
+              <i class="fa-solid fa-bag-shopping"></i>
+              View Cart
+              <span class="rd-cart-count">
+                {{ cart.cartCount$ | async }}
+              </span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         MENU SECTION
+    ══════════════════════════════════ -->
+    <div class="container-app rd-menu-section">
+
+      <!-- Menu toolbar: category filter + veg toggle -->
+      <div class="rd-toolbar">
+
+        <!-- Category tabs -->
+        <div class="rd-cat-tabs">
+          <button
+            *ngFor="let cat of categories"
+            class="cat-tab"
+            [class.active]="activeCategory === cat"
+            (click)="activeCategory = cat">
+            {{ cat }}
+          </button>
+        </div>
+
+        <!-- Veg only toggle -->
+        <div class="rd-veg-toggle"
+             [class.active]="vegOnly"
+             (click)="vegOnly = !vegOnly">
+          <div class="veg-icon">
+            <i class="fa-solid fa-leaf"></i>
+          </div>
+          <span>Veg Only</span>
+          <div class="veg-switch">
+            <div class="veg-thumb"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Menu skeleton -->
+      <ng-container *ngIf="menuLoading">
+        <div class="menu-group" *ngFor="let g of [1,2]">
+          <div class="skeleton mg-title-sk"></div>
+          <div class="menu-grid">
+            <div class="menu-item-skeleton"
+                 *ngFor="let s of skeletonItems">
+              <div class="skeleton mis-img"></div>
+              <div class="mis-body">
+                <div class="skeleton mis-line w65"></div>
+                <div class="skeleton mis-line w45"></div>
+                <div class="skeleton mis-line w80 mt8"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Menu groups -->
+      <ng-container *ngIf="!menuLoading">
+
+        <!-- No items state -->
+        <div *ngIf="filteredItems.length === 0"
+             class="menu-empty">
+          <i class="fa-solid fa-plate-wheat"></i>
+          <h3>No items found</h3>
+          <p>Try removing filters</p>
+        </div>
+
+        <!-- Grouped menu items -->
+        <div
+          *ngFor="let group of groupedItems"
+          class="menu-group">
+
+          <!-- Category heading -->
+          <div class="mg-header">
+            <h2 class="mg-title">{{ group.category }}</h2>
+            <span class="mg-count">
+              {{ group.items.length }} item{{ group.items.length !== 1 ? 's' : '' }}
+            </span>
+          </div>
+
+          <!-- Items grid -->
+          <div class="menu-grid">
+            <div
+              *ngFor="let item of group.items"
+              class="menu-card"
+              [class.unavailable]="!item.available">
+
+              <!-- food image -->
+              <div class="mc-img-wrap">
+                <img
+                  [src]="getMenuItemImage(item)"
+                  [alt]="item.name"
+                  class="mc-img"
+                  loading="lazy">
+
+                <!-- veg / non-veg indicator dot -->
+                <div class="mc-veg-dot"
+                     [class.veg]="item.veg"
+                     [class.nonveg]="!item.veg">
+                  <div class="dot-inner"></div>
+                </div>
+              </div>
+
+              <!-- card body -->
+              <div class="mc-body">
+
+                <div class="mc-top">
+                  <h3 class="mc-name">{{ item.name }}</h3>
+                  <p class="mc-desc"
+                     *ngIf="item.description">
+                    {{ item.description }}
+                  </p>
+                </div>
+
+                <div class="mc-bottom">
+                  <div class="mc-price">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    {{ item.price | number:'1.0-0' }}
+                  </div>
+
+                  <!-- Add button when item NOT in cart -->
+                  <button
+                    *ngIf="getQty(item.id) === 0"
+                    class="mc-add-btn"
+                    [disabled]="!item.available"
+                    (click)="addToCart(item)">
+                    <i class="fa-solid fa-plus"></i>
+                    {{ item.available ? 'Add' : 'Unavailable' }}
+                  </button>
+
+                  <!-- Quantity controls when item IS in cart -->
+                  <div *ngIf="getQty(item.id) > 0"
+                       class="mc-qty-ctrl">
+                    <button class="qty-btn"
+                            (click)="removeFromCart(item)">
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span class="qty-num">
+                      {{ getQty(item.id) }}
+                    </span>
+                    <button class="qty-btn"
+                            (click)="addToCart(item)">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+
+    </div>
+
+  </ng-container>
+
+  <!-- ══════════════════════════════════
+       STICKY BOTTOM CART BAR
+       shown when cart has items
+  ══════════════════════════════════ -->
+  <div
+    class="cart-bar"
+    *ngIf="(cart.cartCount$ | async)! > 0"
+    (click)="goToCart()">
+    <div class="cb-left">
+      <div class="cb-count">
+        {{ cart.cartCount$ | async }} item{{
+          (cart.cartCount$ | async)! !== 1 ? 's' : ''
+        }}
+      </div>
+      <div class="cb-label">in your cart</div>
+    </div>
+    <div class="cb-total">
+      <i class="fa-solid fa-indian-rupee-sign"></i>
+      {{ cart.getTotal() | number:'1.0-0' }}
+    </div>
+    <div class="cb-cta">
+      View Cart
+      <i class="fa-solid fa-arrow-right"></i>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       CART CONFLICT MODAL
+       shown when adding item from
+       a different restaurant
+  ══════════════════════════════════ -->
+  <div class="modal-overlay"
+       *ngIf="showConflictModal"
+       (click)="cancelConflict()">
+
+    <div class="modal-box"
+         (click)="$event.stopPropagation()">
+
+      <div class="modal-icon">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </div>
+
+      <h3 class="modal-title">Start a new cart?</h3>
+
+      <p class="modal-desc">
+        Your cart already has items from a different restaurant.
+        To add items from
+        <strong>{{ restaurant?.name }}</strong>,
+        you need to clear your existing cart first.
+      </p>
+
+      <div class="modal-actions">
+        <button class="modal-btn-cancel"
+                (click)="cancelConflict()">
+          Keep Existing Cart
+        </button>
+        <button class="modal-btn-confirm"
+                (click)="clearAndAdd()">
+          <i class="fa-solid fa-trash"></i>
+          Clear & Add
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

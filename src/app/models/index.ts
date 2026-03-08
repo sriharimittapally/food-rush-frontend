@@ -99,8 +99,8 @@ export interface MenuItem {
   price:          number;
   imageUrl:       string | null;
   category:       string;
-  isVeg:            boolean;  // isVeg → Jackson → "veg"
-  isAvailable:      boolean;  // isAvailable → Jackson → "available"
+  veg:            boolean;  // isVeg → Jackson → "veg"
+  available:      boolean;  // isAvailable → Jackson → "available"
   restaurantId:   number;
   restaurantName: string;
 }

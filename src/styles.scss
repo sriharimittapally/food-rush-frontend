@@ -767,3 +767,41 @@ button { font-family: inherit; }
     font-size: 13px !important;
   }
 }
+
+
+/* Leaflet custom markers */
+.map-marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: white;
+  transform: rotate(-45deg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+  i { transform: rotate(45deg); }
+}
+
+.restaurant-marker {
+  background: #8B5CF6;
+  border: 2px solid #7C3AED;
+}
+
+.rider-marker {
+  background: #F97316;
+  border: 2px solid #EA6A07;
+  animation: riderBounce 1s ease infinite;
+}
+
+.home-marker {
+  background: #22C55E;
+  border: 2px solid #16A34A;
+}
+
+@keyframes riderBounce {
+  0%, 100% { transform: rotate(-45deg) translateY(0);   }
+  50%       { transform: rotate(-45deg) translateY(-4px); }
+}

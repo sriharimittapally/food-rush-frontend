@@ -1,0 +1,192 @@
+<div class="track-root">
+  <div class="container-app">
+
+    <!-- Back button -->
+    <button class="back-btn anim-fade-up" (click)="goToOrders()">
+      <i class="fa-solid fa-arrow-left"></i>
+      My Orders
+    </button>
+
+    <!-- Loading skeleton -->
+    <div *ngIf="loading" class="track-skeleton">
+      <div class="skeleton ts-header"></div>
+      <div class="skeleton ts-map"></div>
+      <div class="skeleton ts-timeline"></div>
+    </div>
+
+    <ng-container *ngIf="!loading && order">
+
+      <!-- ── Header ── -->
+      <div class="track-header anim-fade-up">
+        <div>
+          <div class="th-order-id">
+            <i class="fa-solid fa-receipt"></i>
+            Order #{{ order.id }}
+          </div>
+          <h1 class="th-title">{{ order.restaurantName }}</h1>
+          <div class="th-time">
+            <i class="fa-regular fa-clock"></i>
+            {{ order.createdAt | date:'dd MMM yyyy, hh:mm a' }}
+          </div>
+        </div>
+
+        <!-- Current status badge -->
+        <div class="th-status"
+             [style.color]="getStatusConfig(order.status).color"
+             [style.background]="getStatusConfig(order.status).color + '20'">
+          <i class="fa-solid"
+             [class]="getStatusConfig(order.status).icon"></i>
+          {{ getStatusConfig(order.status).label }}
+        </div>
+      </div>
+
+      <!-- ── CANCELLED state ── -->
+      <div *ngIf="isCancelled" class="cancelled-card anim-fade-up">
+        <i class="fa-solid fa-circle-xmark"></i>
+        <h3>Order Cancelled</h3>
+        <p>This order has been cancelled.</p>
+        <button class="btn-brand" (click)="goToOrders()">
+          View All Orders
+        </button>
+      </div>
+
+      <ng-container *ngIf="!isCancelled">
+
+        <!-- ── Two column layout ── -->
+        <div class="track-grid">
+
+          <!-- LEFT — Map + Timeline -->
+          <div class="track-left">
+
+            <!-- Live map -->
+            <div class="map-card anim-fade-up">
+              <div class="mc-header">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>Live Tracking</span>
+                <div class="live-dot">
+                  <span class="ld-pulse"></span>
+                  LIVE
+                </div>
+              </div>
+              <div id="tracking-map" class="tracking-map"></div>
+              <div class="map-legend">
+                <div class="ml-item">
+                  <div class="ml-dot restaurant"></div>
+                  Restaurant
+                </div>
+                <div class="ml-item">
+                  <div class="ml-dot rider"></div>
+                  Rider
+                </div>
+                <div class="ml-item">
+                  <div class="ml-dot home"></div>
+                  Your Location
+                </div>
+              </div>
+            </div>
+
+            <!-- Status timeline -->
+            <div class="timeline-card anim-fade-up d-100">
+              <h3 class="tc-title">Order Status</h3>
+
+              <div class="timeline">
+                <div
+                  *ngFor="let step of statusSteps"
+                  class="tl-step"
+                  [class.done]="getStepState(step.key) === 'done'"
+                  [class.active]="getStepState(step.key) === 'active'"
+                  [class.pending]="getStepState(step.key) === 'pending'">
+
+                  <!-- connector line -->
+                  <div class="tl-line"></div>
+
+                  <!-- icon circle -->
+                  <div class="tl-icon">
+                    <i class="fa-solid" [class]="step.icon"></i>
+                    <!-- active pulse ring -->
+                    <div class="tl-pulse"
+                         *ngIf="getStepState(step.key) === 'active'">
+                    </div>
+                  </div>
+
+                  <!-- label -->
+                  <div class="tl-label">{{ step.label }}</div>
+
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- RIGHT — Order details -->
+          <div class="track-right">
+
+            <!-- Delivery address -->
+            <div class="detail-card anim-fade-up">
+              <div class="dc-header">
+                <i class="fa-solid fa-location-dot"></i>
+                Delivering to
+              </div>
+              <div class="dc-value">
+                {{ order.deliveryAddress }}
+              </div>
+            </div>
+
+            <!-- Special instructions -->
+            <div class="detail-card anim-fade-up d-50"
+                 *ngIf="order.specialInstructions">
+              <div class="dc-header">
+                <i class="fa-solid fa-note-sticky"></i>
+                Special Instructions
+              </div>
+              <div class="dc-value">
+                {{ order.specialInstructions }}
+              </div>
+            </div>
+
+            <!-- Order items -->
+            <div class="items-card anim-fade-up d-100">
+              <h3 class="ic-title">
+                <i class="fa-solid fa-bag-shopping"></i>
+                Your Order
+              </h3>
+
+              <div class="items-list">
+                <div *ngFor="let item of order.orderItems"
+                     class="item-row">
+                  <div class="ir-left">
+                    <!-- veg dot -->
+                    <div class="ir-dot"
+                         [class.veg]="item.veg"
+                         [class.nonveg]="!item.veg">
+                      <div class="ird-inner"></div>
+                    </div>
+                    <div class="ir-name">{{ item.menuItemName }}</div>
+                    <div class="ir-qty">× {{ item.quantity }}</div>
+                  </div>
+                  <div class="ir-price">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    {{ item.subtotal | number:'1.0-0' }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="items-total">
+                <span>Total</span>
+                <span class="it-amount">
+                  <i class="fa-solid fa-indian-rupee-sign"></i>
+                  {{ order.totalAmount | number:'1.0-0' }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </ng-container>
+  </div>
+</div>

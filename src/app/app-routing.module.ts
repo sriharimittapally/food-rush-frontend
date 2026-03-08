@@ -22,6 +22,9 @@ import { OwnerDashboardComponent }
   from './pages/dashboard/owner-dashboard/owner-dashboard.component';
 import { AdminDashboardComponent }
   from './pages/dashboard/admin-dashboard/admin-dashboard.component';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { OrderTrackingComponent }
+  from './pages/order-tracking/order-tracking.component';
 
 const routes: Routes = [
   // Public
@@ -65,9 +68,14 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { roles: ['ADMIN'] }
   },
-
+{
+  path: 'orders/track/:id',
+  component: OrderTrackingComponent,
+  canActivate: [AuthGuard],
+  data: { roles: ['CUSTOMER'] }
+},
   // Fallback
-  { path: '**', redirectTo: '' }
+{ path: '**', component: NotFoundComponent }
 ];
 
 @NgModule({
